@@ -60,7 +60,7 @@ categories = ['Psicoterapia', 'Nutrição', 'Terapia', 'Personal trainer',
 
 files = get_files("../csv/")
 df_names, dfs = get_dataframes(files)
-df = dfs[1]
+df = dfs[2]
 
 
 
@@ -102,7 +102,7 @@ def date_plot():
 
 def weekday_plot():
     df['datetime'] = pd.to_datetime(df['datetime'])
-    df['day_of_week'] = df['datetime'].dt.day_name().sort()
+    df['day_of_week'] = df['datetime'].dt.day_name()
     frequencie = df['day_of_week'].value_counts()
     frequencie.plot()
     plt.show()
