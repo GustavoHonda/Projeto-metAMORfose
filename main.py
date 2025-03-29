@@ -62,8 +62,6 @@ files = get_files("../csv/")
 df_names, dfs = get_dataframes(files)
 df = dfs[2]
 
-
-
 df = df.reset_index()
 set_header(df)
 df = drop_nan(df)
