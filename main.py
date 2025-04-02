@@ -1,15 +1,24 @@
-import json 
 import os
 import pandas as pd
 from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
-import numpy as np
 import warnings
-import csv
 
 
 def get_files(path,selected = []):
+    '''
+    Select all csv files in path.
+    
+    args:
+        path (str): relative path to datasets directory Ex:"./csv".
+        selects ([str]): specific files to be selected in datasets directory.
+    
+    returns:
+        [str]: list of file paths to selected datasets.
+    
+    '''
+    
     files = []
     for arquivo in os.listdir(path):
         if arquivo.endswith(".csv"):
@@ -20,7 +29,17 @@ def get_files(path,selected = []):
                 files.append(os.path.join(path, arquivo))
     return sorted(files)
 
-def get_dataframes(files,list=[]):
+def get_dataframes(files):
+    '''
+    Get dataframes from files.
+    
+    args:
+        files ([str]): full path to csv datasets files.
+    
+    returns:
+        [str], [Dataframe]: list of dataframe names and list of dataframes.
+    '''
+    
     if files == []:
         print("Error: null files for dataframe")
         exit(0)
@@ -31,64 +50,55 @@ def get_dataframes(files,list=[]):
         df_names.append(name)
         df = pd.read_csv(fi, index_col=0)
         dfs.append(df)
-    # labels = [element.replace(".","_") for element in df.index]
     return df_names, dfs
-
-def get_columns(df):
-    return df.columns
-
-def get_dif_values(df, column):
-    return df[column].unique()
     
 def set_header(df):
+    '''
+    Set first row of dataframse as headers.
+    
+    args:
+        df (Dataframe): Dataframe to be modified.
+    
+    returns:
+        Dataframe: Modified Dataframe.
+    '''
+    
     new_header = df.iloc[0] #grab the first row for the header
     df = df[1:] #take the data less the header row
     df.columns = new_header #set the header row as the df header
     return df
 
 def drop_nan(df):
+    '''
+    Drop all rows with Nan value in any column.
+    
+    args:
+        df (Dataframe): Dataframe to be modified.
+        
+    return:
+        Dataframe: Modified Dataframe.
+    '''
+    
     df = df.dropna(axis=1, how='all')
     return df
 
-categories = ['Psicoterapia', 'Nutrição', 'Terapia', 'Personal trainer',
-       'Terapia holística', 'Clínico geral', 'Outros', 'Psiquiatria',
-       'Terapia de psicologia ou psicanálise', 'Ginecologista',
-       'Geriatra ou Gerontólogo']
-
-
-
-
-files = get_files("../csv/")
-df_names, dfs = get_dataframes(files)
-df = dfs[2]
-
-df = df.reset_index()
-set_header(df)
-df = drop_nan(df)
-
-df["categorie"] = df["categorie"].str.split(",")
-df = df.explode('categorie')
-df['categorie'] = df['categorie'].str.replace("Médico","", regex=True)
-df['categorie'] = df['categorie'].str.replace(":","", regex=True)
-df['categorie'] = df['categorie'].str.strip()
-
-df['datetime'] = pd.to_datetime(df['time'], dayfirst=True)
-df['datetime'] = df['datetime'].dt.strftime(f'%Y/%m/%d %H:%M:%S')
-df[['date','time']] = df['time'].str.split(" ", expand= True )
-
-
-def date_plot():
+def date_plot(df, column = 'date', precision = '7D'):
     '''
-    var = ['time','date','datetime']
-    precision = ['xxMin','H','D','W','M','Y']
+    Plot continuos sampled date chart of given Dataframe.
+    
+    args:
+        df (Dataframe): Dataframe with date column.
+        column (str): Name of date column.
+        precision (str): Precision of sampling. Ex: 'xxMin','H','D','W','M','Y'
+
+    return:
+        None.
     '''
-    var = 'date'
-    precision = '7D'
-    df[var] = pd.to_datetime(df[var])
+    
+    df[column] = pd.to_datetime(df[column])
     frequencie = df[:]
-    frequencie.set_index(var)
-    frequencie = df.resample(precision, on=var).size()
-    print(frequencie)
+    frequencie.set_index(column)
+    frequencie = df.resample(precision, on=column).size()
     plt.figure(figsize=(10, 5))
     frequencie.plot(kind='line', marker='o')
     plt.xlabel('Date')
@@ -98,23 +108,114 @@ def date_plot():
     plt.tight_layout()
     plt.show()
 
-def weekday_plot():
-    df['datetime'] = pd.to_datetime(df['datetime'])
-    df['day_of_week'] = df['datetime'].dt.day_name()
+def weekday_plot(df, column= 'datetime'):
+    '''
+    Plot weekly frequencie of given Dataframe column.
+    
+    args:
+        df (Dataframe): Dataframe with date column.
+        column (str): Name of date column.
+        precision (str): Precision of sampling. Ex: 'xxMin','H','D','W','M','Y'
+
+    return:
+        None.
+    '''
+    
+    df[column] = pd.to_datetime(df[column])
+    df['day_of_week'] = df[column].dt.day_name()
     frequencie = df['day_of_week'].value_counts()
+    frequencie = frequencie.reindex(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'])
+    frequencie.index = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo']
     frequencie.plot()
+    plt.ylabel('Frequência')
+    plt.xlabel('Dia da semana')
+    plt.title('Frequência pelo dia da semana')
     plt.show()
     
 
-def categorie_plot():
-    frequencie = df['categorie'].value_counts()
-    print(frequencie.index)
+def categorie_plot(df, column):
+    '''
+    Plot categorie frequencie of given Dataframe column.
+    
+    args:
+        df (Dataframe): Dataframe with categorie column.
+        column (str): Name of categorie column.
+
+    return:
+        None.
+    '''
+    
+    frequencie = df[column].value_counts()
     frequencie.sort_values(ascending=True).plot(kind='barh')
     # frequencie.plot(kind='pie',autopct='%1.1f%%')
-    plt.title('Categorias mais requisitadas')
+    plt.title('Gráfico de categorias')
+    plt.ylabel('Categorias')
     plt.ylabel('Contagem')
     plt.show()
 
-categorie_plot()
-date_plot()
-weekday_plot()
+
+def preprocess_dfclient(df):
+    '''
+    Preprocess Client Dataframe.
+    
+    args:
+        df (Dataframe): Client Dataframe
+    
+    return:
+        Dataframe: Preprocessed Dataframe.
+    
+    '''
+    
+    df = df.reset_index()
+    # set_header(df)
+    df = drop_nan(df)
+
+    # Categorie column
+    df["categorie"] = df["categorie"].str.split(",")
+    df = df.explode('categorie')
+    df['categorie'] = df['categorie'].str.replace("Médico","", regex=True)
+    df['categorie'] = df['categorie'].str.replace(":","", regex=True)
+    df['categorie'] = df['categorie'].str.strip()
+
+    # Datetime column
+    df['datetime'] = pd.to_datetime(df['time'], dayfirst=True)
+    df['datetime'] = df['datetime'].dt.strftime(f'%Y/%m/%d %H:%M:%S')
+    df[['date','time']] = df['time'].str.split(" ", expand= True )
+
+    return df
+
+def preprocess_dfprofissional(df):
+    '''
+    Preprocess Professional Dataframe.
+    
+    args:
+        df (Dataframe): Professional Dataframe
+    
+    return:
+        Dataframe: Preprocessed Dataframe.
+    
+    '''
+    
+    return df
+
+
+
+
+def main():
+
+    files = get_files("../csv/")
+    df_names, dfs = get_dataframes(files)
+
+    # Print Client charts
+    df_client = preprocess_dfclient(df=dfs[3])
+    categorie_plot(df=df_client, column='categorie')
+    date_plot(df=df_client, column='date', precision='W')
+    weekday_plot(df=df_client, column='datetime')
+
+    # Print Professional charts
+    df_profissional = preprocess_dfprofissional(df=dfs[0])
+    categorie_plot(df=df_profissional,column='area')
+
+
+if __name__ == '__main__':
+    main()
