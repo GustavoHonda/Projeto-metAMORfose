@@ -94,7 +94,7 @@ def preprocess_df_resposta(df):
     
     df = df.reset_index()
     # set_header(df)
-    df = drop_nan(df)
+    df = df.dropna(axis=1)
 
     # Categorie column
     df["categorie"] = df["categorie"].str.split(",")
@@ -110,6 +110,7 @@ def preprocess_df_resposta(df):
 
     return df
 
+
 def preprocess_df_profissional(df):
     '''
     Preprocess Professional Dataframe.
@@ -123,8 +124,6 @@ def preprocess_df_profissional(df):
     '''
     
     return df
-
-
 
 
 def main():

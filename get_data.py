@@ -1,5 +1,11 @@
 import pandas as pd
 import json
+import requests
+
+def data_info(df,column):
+    print(df[column].unique())
+    print(df[column].dtype)
+
 
 with open("../key/sheets_url.json") as file: 
         data = json.load(file) 
@@ -7,21 +13,24 @@ with open("../key/sheets_url.json") as file:
 
 def preprocess_respostas(df):
         
-        name_columns= ['time','name','e-mail','phone','categorie','description','max_price','price','phone2','urgencie','free_service','sexual_identity','profissional','whatsapp']
+        name_columns= ['time','name_paciente','e-mail','phone_paciente','area','description','max_price','price','phone2','urgencie','free_service','sexual_identity','profissional','whatsapp']
         df.columns = name_columns
-        df = df.reset_index()
+        
+        type_columns=[str,str,str,int,str,str,int,int,int,str,str,str,str,str]
+        
+        # df = df.reset_index()
         df = df.dropna(axis=1, how='all')
 
-        # Categorie column
-        df["categorie"] = df["categorie"].str.split(",")
-        df = df.explode('categorie')
-        df['categorie'] = df['categorie'].str.replace("Médico","", regex=True)
-        df['categorie'] = df['categorie'].str.replace(":","", regex=True)
-        df['categorie'] = df['categorie'].str.strip()
+        # area column
+        df.loc[:,"area"] = df["area"].str.split(",")
+        df = df.explode('area')
+        df.loc[:,'area'] = df['area'].str.replace("Médico","", regex=True)
+        df.loc[:,'area'] = df['area'].str.replace(":","", regex=True)
+        df.loc[:,'area'] = df['area'].str.strip()
 
         # Datetime column
-        df['datetime'] = pd.to_datetime(df['time'], dayfirst=True)
-        df['datetime'] = df['datetime'].dt.strftime(f'%Y/%m/%d %H:%M:%S')
+        df.loc[:,'datetime'] = pd.to_datetime(df['time'], dayfirst=True)
+        df.loc[:,'datetime'] = df['datetime'].dt.strftime(f'%Y/%m/%d %H:%M:%S')
         df[['date','time']] = df['time'].str.split(" ", expand= True )
         return df
 
@@ -31,12 +40,13 @@ def preprocess_profissional(df) -> pd.DataFrame:
         df['freq'] = '0'
         
         # Rename columns
-        name_columns = ['name','area','CRN','phone','price','none','gender','freq']
+        name_columns = ['name_professional','area','CRN','phone_professional','price','gender','freq']
         df.columns = name_columns
+        
         
         # Remove unwanted data
         df = df.dropna(axis=1)
-        df.loc[:,'phone'] = df['phone'].apply(lambda x: x.replace("wa.me/",""),)
+        df.loc[:,'phone_professional'] = df['phone_professional'].apply(lambda x: x.replace("wa.me/",""),)
         df.loc[:,'price'] = df['price'].apply(lambda x: x.replace("+",""))
         
         # Setting correct types
@@ -58,16 +68,28 @@ def open_profissional():
         df = preprocess_profissional(df)
         return df
 
+def send_data(row, col, value):
+        payload = {"row": row, "col": col, "value": value}
+        url = data['url_google_script']
+        response = requests.post(url, data=payload)
+        if str(response) == "<Response [200]>":
+                print("Request Accepted!")
+        else:
+                print(response)
+        
+        return response
+
+
 
 def main():
         df_resposta = open_respostas()
         df_profissional = open_profissional()
         
-        print(df_resposta)
+        response = send_data(40,1,"Modificado")
         
-        # df_resposta = pd.merge(df_profissional, df_resposta, on=['categorie','price'], how='inner')
-        # result_professional = df_profissional.loc[df_profissional['categorie'] == "Psiquiatria"]
-        # result_resposta = df_resposta.loc[df_resposta['categorie'] == "Psiquiatria"]
+        # df_resposta = pd.merge(df_profissional, df_resposta, on=['area','price'], how='inner')
+        # result_professional = df_profissional.loc[df_profissional['area'] == "Psiquiatria"]
+        # result_resposta = df_resposta.loc[df_resposta['area'] == "Psiquiatria"]
         
 
 if __name__ == "__main__":
