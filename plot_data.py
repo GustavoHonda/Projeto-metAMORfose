@@ -3,84 +3,9 @@ import pandas as pd
 from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
+from get_data import open_profissional, open_respostas
 import warnings
 
-
-def get_files(path,selected = []):
-    '''
-    Select all csv files in path.
-    
-    args:
-        path (str): relative path to datasets directory Ex:"./csv".
-        selects ([str]): specific files to be selected in datasets directory.
-    
-    returns:
-        [str]: list of file paths to selected datasets.
-    
-    '''
-    
-    files = []
-    for arquivo in os.listdir(path):
-        if arquivo.endswith(".csv"):
-            if selected != []:
-                if arquivo.replace(".csv","") in selected:
-                    files.append(os.path.join(path, arquivo))
-            else:
-                files.append(os.path.join(path, arquivo))
-    return sorted(files)
-
-def get_dataframes(files):
-    '''
-    Get dataframes from files.
-    
-    args:
-        files ([str]): full path to csv datasets files.
-    
-    returns:
-        [str], [Dataframe]: list of dataframe names and list of dataframes.
-    '''
-    
-    if files == []:
-        print("Error: null files for dataframe")
-        exit(0)
-    dfs = []
-    df_names = []
-    for loop,fi in enumerate(files):
-        name = os.path.basename(fi).replace(".csv","")
-        df_names.append(name)
-        df = pd.read_csv(fi, index_col=0)
-        dfs.append(df)
-    return df_names, dfs
-    
-def set_header(df):
-    '''
-    Set first row of dataframse as headers.
-    
-    args:
-        df (Dataframe): Dataframe to be modified.
-    
-    returns:
-        Dataframe: Modified Dataframe.
-    '''
-    
-    new_header = df.iloc[0] #grab the first row for the header
-    df = df[1:] #take the data less the header row
-    df.columns = new_header #set the header row as the df header
-    return df
-
-def drop_nan(df):
-    '''
-    Drop all rows with Nan value in any column.
-    
-    args:
-        df (Dataframe): Dataframe to be modified.
-        
-    return:
-        Dataframe: Modified Dataframe.
-    '''
-    
-    df = df.dropna(axis=1, how='all')
-    return df
 
 def date_plot(df, column = 'date', precision = '7D'):
     '''
@@ -95,7 +20,7 @@ def date_plot(df, column = 'date', precision = '7D'):
         None.
     '''
     
-    df[column] = pd.to_datetime(df[column])
+    df[column] = pd.to_datetime(df[column], dayfirst=True)
     frequencie = df[:]
     frequencie.set_index(column)
     frequencie = df.resample(precision, on=column).size()
@@ -107,6 +32,7 @@ def date_plot(df, column = 'date', precision = '7D'):
     plt.grid(True)
     plt.tight_layout()
     plt.show()
+    
 
 def weekday_plot(df, column= 'datetime'):
     '''
@@ -154,12 +80,12 @@ def categorie_plot(df, column):
     plt.show()
 
 
-def preprocess_dfclient(df):
+def preprocess_df_resposta(df):
     '''
-    Preprocess Client Dataframe.
+    Preprocess resposta Dataframe.
     
     args:
-        df (Dataframe): Client Dataframe
+        df (Dataframe): resposta Dataframe
     
     return:
         Dataframe: Preprocessed Dataframe.
@@ -184,7 +110,7 @@ def preprocess_dfclient(df):
 
     return df
 
-def preprocess_dfprofissional(df):
+def preprocess_df_profissional(df):
     '''
     Preprocess Professional Dataframe.
     
@@ -203,17 +129,15 @@ def preprocess_dfprofissional(df):
 
 def main():
 
-    files = get_files("../csv/")
-    df_names, dfs = get_dataframes(files)
+    df_resposta = open_respostas()
+    df_profissional = open_profissional()
 
-    # Print Client charts
-    df_client = preprocess_dfclient(df=dfs[3])
-    categorie_plot(df=df_client, column='categorie')
-    date_plot(df=df_client, column='date', precision='W')
-    weekday_plot(df=df_client, column='datetime')
+    # Print resposta charts
+    categorie_plot(df=df_resposta, column='categorie')
+    date_plot(df=df_resposta, column='date', precision='W')
+    weekday_plot(df=df_resposta, column='datetime')
 
     # Print Professional charts
-    df_profissional = preprocess_dfprofissional(df=dfs[0])
     categorie_plot(df=df_profissional,column='area')
 
 

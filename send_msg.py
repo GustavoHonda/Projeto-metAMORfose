@@ -1,14 +1,9 @@
 import pyautogui as pg
 import webbrowser as web
 import time
-import random 
-
-from whatsapp_api_client_python import API
+from get_data import open_profissional, open_respostas
 
 # xhost + local:
-# Nsiamfumu,?,,(11) 978078949,Hello Sumae
-# Gustavo,Honda,,(11) 950440023,Hello pyautogui
-
 
 def exit_webpg():
     time.sleep(2)
@@ -33,14 +28,17 @@ def send_msg(phone, message):
     pg.write(message) #Write message
     pg.press("enter") #Send
     pg.click(search_bar_x + 250, search_bar_y) #Erase phone number from searchbar
-    
-    
-    
+
 
 if __name__ == '__main__':
-    phone = "558585410805"
-    message = "Hello pyautogui!"
-    # direct_msg(phone, message)
-    send_msg(phone, message)
-    time.sleep(3)
-    exit_webpg()
+    df_respostas = open_respostas()
+    df_profissional = open_profissional()
+    
+    print(df_profissional)
+    
+    # phone = "558585410805"
+    # message = "Hello pyautogui!"
+    # # direct_msg(phone, message)
+    # send_msg(phone, message)
+    # time.sleep(3)
+    # exit_webpg()
