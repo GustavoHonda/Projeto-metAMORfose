@@ -3,7 +3,19 @@ import json
 import requests
 
 
+# Erros/implementações que tem pra fazer/corrigir nesse módulo:
+# 1.coluna price de df_respostas tem descrição dos preços solicitados, precisa transformar para int
+# 2.extrair mais informações da descrição das respostas de cada paciente(implementação complicada)
+# 3.
+
 def data_info(df,column):
+    """
+    Função auxiliar que mostra os valores únicos e tipo de certa coluna do dataframe
+
+    Args:
+        df (pd.Dataframe): Dataframe analisado
+        column (str): coluna analisada
+    """
     print(df[column].unique())
     print(df[column].dtype)
 
@@ -92,4 +104,3 @@ def main():
 
 if __name__ == "__main__":
         main()
-        

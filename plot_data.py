@@ -6,6 +6,8 @@ from matplotlib.ticker import MaxNLocator
 from get_data import open_profissional, open_respostas
 import warnings
 
+# Erros/implementações que tem pra fazer/corrigir nesse módulo:
+
 
 def date_plot(df, column = 'date', precision = '7D'):
     '''
@@ -59,13 +61,13 @@ def weekday_plot(df, column= 'datetime'):
     plt.show()
     
 
-def categorie_plot(df, column):
+def area_plot(df, column):
     '''
-    Plot categorie frequencie of given Dataframe column.
+    Plot area frequencie of given Dataframe column.
     
     args:
-        df (Dataframe): Dataframe with categorie column.
-        column (str): Name of categorie column.
+        df (Dataframe): Dataframe with area column.
+        column (str): Name of area column.
 
     return:
         None.
@@ -80,64 +82,18 @@ def categorie_plot(df, column):
     plt.show()
 
 
-def preprocess_df_resposta(df):
-    '''
-    Preprocess resposta Dataframe.
-    
-    args:
-        df (Dataframe): resposta Dataframe
-    
-    return:
-        Dataframe: Preprocessed Dataframe.
-    
-    '''
-    
-    df = df.reset_index()
-    # set_header(df)
-    df = df.dropna(axis=1)
-
-    # Categorie column
-    df["categorie"] = df["categorie"].str.split(",")
-    df = df.explode('categorie')
-    df['categorie'] = df['categorie'].str.replace("Médico","", regex=True)
-    df['categorie'] = df['categorie'].str.replace(":","", regex=True)
-    df['categorie'] = df['categorie'].str.strip()
-
-    # Datetime column
-    df['datetime'] = pd.to_datetime(df['time'], dayfirst=True)
-    df['datetime'] = df['datetime'].dt.strftime(f'%Y/%m/%d %H:%M:%S')
-    df[['date','time']] = df['time'].str.split(" ", expand= True )
-
-    return df
-
-
-def preprocess_df_profissional(df):
-    '''
-    Preprocess Professional Dataframe.
-    
-    args:
-        df (Dataframe): Professional Dataframe
-    
-    return:
-        Dataframe: Preprocessed Dataframe.
-    
-    '''
-    
-    return df
-
-
 def main():
 
     df_resposta = open_respostas()
     df_profissional = open_profissional()
 
     # Print resposta charts
-    categorie_plot(df=df_resposta, column='categorie')
+    area_plot(df=df_resposta, column='area')
     date_plot(df=df_resposta, column='date', precision='W')
     weekday_plot(df=df_resposta, column='datetime')
 
     # Print Professional charts
-    categorie_plot(df=df_profissional,column='area')
+    area_plot(df=df_profissional,column='area')
 
 
 if __name__ == '__main__':

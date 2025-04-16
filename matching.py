@@ -2,6 +2,8 @@ from get_data import open_profissional, open_respostas, data_info
 import pandas as pd
 
 
+# Erros/implementações que tem pra fazer/corrigir nesse módulo:
+
 def match(df_profissional, df_resposta):
     df_profissional = df_profissional[["area","phone_professional","price","freq"]]
     res = df_resposta['phone_paciente']
@@ -11,9 +13,10 @@ def match(df_profissional, df_resposta):
     df_merge.iloc[5,df_merge.columns.get_loc("freq")] = -1
     df_merge = df_merge.sort_values('freq',ascending=True)
     top_10 = df_merge.head(10)
+    
     return top_10
     
-    
+
 def main():
     df1 = open_profissional()
     df2 = open_respostas()

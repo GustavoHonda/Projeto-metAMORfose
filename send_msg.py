@@ -9,9 +9,16 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+import subprocess
 
-# (É necessário rodar esse comando no terminal para enviar as mensagens pelo whatsapp web)
-# xhost + local:
+# Erros/implementações que tem pra fazer/corrigir nesse módulo:
+# 1.Ao buscar a imagem search_bar na tela do usuário o tamanho da imagem é levado em consideração
+# 2.check_load() acessa web.whatsapp.com e retorna apenas a tela de loading da aplicação e não sabemos se a tela carregou ou não 
+
+
+def enable_localhost_execution():
+    subprocess.run("xhost + local:", shell = True, executable="/bin/bash")
+
 
 def exit_webpg():
     try:
@@ -23,20 +30,22 @@ def exit_webpg():
         print("Exit error")
         return -1
 
+
 def direct_msg(phone, message):
     web.open("https://web.whatsapp.com/send?phone="+phone+"&text="+message)
     time.sleep(5)
     pg.press("enter")
     
+    
 def open_page():
-    chrome = web.Chrome()
-    # response = chrome.open("https://web.whatsapp.com")
+    enable_localhost_execution()
     response = web.open("https://web.whatsapp.com")
     if not response:
         raise ConnectionError
     else:
         print("Connection established")    
     return response
+
 
 def check_load(): # Ainda não funcional
     chrome_options = Options()
@@ -70,7 +79,7 @@ if __name__ == '__main__':
     df_respostas = open_respostas()
     df_profissional = open_profissional()
     
-    phone = "11976154853"
+    phone = "1150440023"
     message = "bhjkbbkjlkl"
     response = open_page()
     # status = check_load()
@@ -78,3 +87,5 @@ if __name__ == '__main__':
     send_msg(phone, message)
     time.sleep(3)
     # exit_webpg()
+    
+    
