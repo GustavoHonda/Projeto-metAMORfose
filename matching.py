@@ -3,6 +3,9 @@ import pandas as pd
 
 
 # Erros/implementações que tem pra fazer/corrigir nesse módulo:
+# 1. matching muito simples
+# 2. precisa fazer um loop para todos os profissionais (2 respostas para cada profissional e não 10)
+# 3. profissional não pode receber o mesmo contato de paciente 2 vezes
 
 def match(df_profissional, df_resposta):
     df_profissional = df_profissional[["area","phone_professional","price","freq"]]
@@ -13,7 +16,6 @@ def match(df_profissional, df_resposta):
     df_merge.iloc[5,df_merge.columns.get_loc("freq")] = -1
     df_merge = df_merge.sort_values('freq',ascending=True)
     top_10 = df_merge.head(10)
-    
     return top_10
     
 

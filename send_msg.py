@@ -12,9 +12,10 @@ from selenium.webdriver.chrome.options import Options
 import subprocess
 
 # Erros/implementações que tem pra fazer/corrigir nesse módulo:
-# 1.Ao buscar a imagem search_bar na tela do usuário o tamanho da imagem é levado em consideração
-# 2.check_load() acessa web.whatsapp.com e retorna apenas a tela de loading da aplicação e não sabemos se a tela carregou ou não 
-
+# 1. Ao buscar a imagem search_bar na tela do usuário o tamanho da imagem é levado em consideração
+# 2. check_load() acessa web.whatsapp.com e retorna apenas a tela de loading da aplicação e não sabemos se a tela carregou ou não 
+# 3. Utilizar o editacódigo para fazer o envio de mensagens
+# 4. Tomar cuidade para a conta não ser bloqueada por utilização de chatbot (colocar timers e mimetizar o comportamento de um usuário real) 
 
 def enable_localhost_execution():
     subprocess.run("xhost + local:", shell = True, executable="/bin/bash")
@@ -72,7 +73,7 @@ def send_msg(phone, message):
     time.sleep(1)
     pg.write(message) 
     pg.press("enter") 
-    pg.click(search_bar_x + 250, search_bar_y) 
+    pg.click(search_bar_x + 250, search_bar_y)
 
 
 if __name__ == '__main__':
@@ -87,5 +88,3 @@ if __name__ == '__main__':
     send_msg(phone, message)
     time.sleep(3)
     # exit_webpg()
-    
-    
