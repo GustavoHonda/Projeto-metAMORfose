@@ -6,7 +6,6 @@ import requests
 # Erros/implementações que tem pra fazer/corrigir nesse módulo:
 # 1.coluna price de df_respostas tem descrição dos preços solicitados, precisa transformar para int
 # 2.extrair mais informações da descrição das respostas de cada paciente(implementação complicada)
-# 3.
 
 def data_info(df,column):
     """
@@ -55,9 +54,13 @@ def preprocess_profissional(df) -> pd.DataFrame:
         df.columns = name_columns
         
         # Remove unwanted data
-        df = df.dropna(axis=1)
-        df.loc[:,'phone_professional'] = df['phone_professional'].apply(lambda x: x.replace("wa.me/",""),)
-        df.loc[:,'price'] = df['price'].apply(lambda x: x.replace("+",""))
+        df = df.dropna(axis=1,how='all')
+        df = df.dropna(axis=0,how='any')
+        
+        data_info(df,'phone_professional')
+        
+        df.loc[:,'phone_professional'] = df['phone_professional'].apply(lambda x: x.replace("wa.me/","") if type(x) == str else x)
+        df.loc[:,'price'] = df['price'].apply(lambda x: x.replace("+","") if type(x) == str else x )
         
         # Setting correct types
         type_columns = [str,str,str,int,int,object,str,int]
@@ -76,6 +79,7 @@ def open_respostas():
 def open_profissional():
         sheets_professional = data['url_profissionais']
         df = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{sheets_professional}/export?format=csv")
+        print(df)
         df = preprocess_profissional(df)
         return df
 
@@ -99,7 +103,7 @@ def main():
         print(df_resposta)
         
         # Modify value from sheets table obs: (ainda tem erro ao modificar tabela, depois não é possível obter as informações da planilha)
-        # response = send_data(40,1,"Modificado")
+        response = send_data(40,1,"Modificado")
 
 
 if __name__ == "__main__":
