@@ -5,7 +5,7 @@ import re
 
 
 # Erros/implementações que tem pra fazer/corrigir nesse módulo:
-# 1.coluna price de df_respostas tem descrição dos preços solicitados, precisa transformar para int
+# 1.coluna price de df_respostas tem descrição (str) dos preços solicitados, precisa transformar para (int)
 # 2.extrair mais informações da descrição das respostas de cada paciente(implementação complicada)
 
 
@@ -22,7 +22,7 @@ def data_info(df,column):
     print(df[column].dtype)
 
 
-with open("../key/sheets_url.json") as file: 
+with open("./key/sheets_url.json") as file: 
         data = json.load(file) 
 
 
@@ -118,7 +118,7 @@ def main():
     # Get dataframes of resposta & profissional
     df_resposta = open_respostas()
     df_profissional = open_profissional()
-    response = send_data(40,1,"Modificado")
+    response = send_data(40,1,"valor a ser inserido")
 
 
 if __name__ == "__main__":
