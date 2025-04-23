@@ -2,6 +2,7 @@ import pandas as pd
 import json
 import requests
 import re
+import os
 
 
 # Erros/implementações que tem pra fazer/corrigir nesse módulo:
@@ -21,8 +22,8 @@ def data_info(df,column):
     print(df[column].unique())
     print(df[column].dtype)
 
-
-with open("../key/sheets_url.json") as file: 
+file_path = os.path.join(os.path.dirname(__file__), "../key/sheets_url.json")
+with open(file_path) as file: 
     data = json.load(file) 
 
 
@@ -57,7 +58,6 @@ def preprocess_respostas(df):
 
     # Datetime column
     df.loc[:,'datetime'] = pd.to_datetime(df['time'], dayfirst=True)
-    df.loc[:,'datetime'] = df['datetime'].dt.strftime(f'%Y/%m/%d %H:%M:%S')
     df[['date','time']] = df['time'].str.split(" ", expand= True )
     
     # Price Column
