@@ -1,7 +1,7 @@
 import pyautogui as pg
 import webbrowser as web
 import time
-from get_data import open_profissional, open_respostas
+from get_data import open_profissional, open_respostas, open_mock
 import bs4, requests
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -10,13 +10,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 import subprocess
+from pathlib import Path
 
 # Erros/implementações que tem pra fazer/corrigir nesse módulo:
-# 1. Ao buscar a imagem search_bar na tela do usuário o tamanho da imagem é levado em consideração
+# 1. (FEITO) Ao buscar a imagem search_bar na tela do usuário o tamanho da imagem é levado em consideração
 # 2. check_load() acessa web.whatsapp.com e retorna apenas a tela de loading da aplicação e não sabemos se a tela carregou ou não 
 # 3. Utilizar o editacódigo para fazer o envio de mensagens
 # 4. Tomar cuidade para a conta não ser bloqueada por utilização de chatbot (colocar timers e mimetizar o comportamento de um usuário real) 
-
+# 5. Melhorar a função de enviar mensagens para que ela não dependa de uma imagem
 def enable_localhost_execution():
     subprocess.run("xhost + local:", shell = True, executable="/bin/bash")
 
@@ -64,27 +65,73 @@ def check_load(): # Ainda não funcional
         print("Erro ao aguardar carregamento:", e)
     driver.quit()
     
-def send_msg(phone, message):
-    search_bar = pg.locateOnScreen('search_bar.png') 
-    search_bar_x, search_bar_y = pg.center(search_bar) 
-    pg.click(search_bar_x, search_bar_y)
-    pg.write(phone) 
-    pg.press('enter') 
-    time.sleep(1)
-    pg.write(message) 
-    pg.press("enter") 
-    pg.click(search_bar_x + 250, search_bar_y)
+    
+def locate_serch_bar():
+    try:
+        path = Path("../img/").resolve()
+        for path in path.iterdir():
+            path = str(path)
+            search_bar = pg.locateOnScreen(path) 
+            if search_bar is not None:
+                break
+        search_bar_x, search_bar_y = pg.center(search_bar) 
+        return search_bar_x, search_bar_y
+    except Exception as e:
+        print("Error:", e)
+        print("Error in locate_serch_bar")
+        exit_webpg()
+        return -1
+    
+    
+def send_msg(phone, message, search_bar_pos):
+    try:
+        pg.click(search_bar_pos[0], search_bar_pos[1])
+        pg.write(phone) 
+        pg.press('enter') 
+        time.sleep(1)
+        for line in message:
+            pg.write(line)
+            pg.hotkey('shift', 'enter')
+        time.sleep(1)
+        pg.press("enter") 
+        pg.click(search_bar_pos[0] + 250, search_bar_pos[1])
+    except Exception as e:
+        print("Error:", e)
+        print("Error in send_msg")
+        exit_webpg()
+        return -1
+
+def send_batch(df):
+    response = open_page()
+    time.sleep(7)
+    pos = locate_serch_bar()
+    try:
+        df = df[['first_name','last_name','phone_professional','phone_pacient','description','price']]
+        n_total = len(df)
+        for index, row in df.iterrows():
+            text = text_message(row["first_name"], row["last_name"], row["phone_pacient"], row["description"], row["price"])
+            send_msg(row["phone_professional"], text, pos)
+            print(f"{index + 1} de {n_total} mensagens enviadas")
+    except Exception as e:
+        print("Error:", e)
+        print("Error in send_batch")
+        exit_webpg()
+        return -1
+    print("Suceessfully sent all messages")
+    exit_webpg()
+
+
+def text_message(first_name, last_name, phone, description, price):
+    text = (f"Segue indicação de paciente:",
+            f"Nome: {first_name} {last_name}",
+            f"Contato: {phone}",
+            f"Problemas: {description}",
+            f"Valor sugerido: {price}R$")
+    return text
 
 
 if __name__ == '__main__':
     df_respostas = open_respostas()
     df_profissional = open_profissional()
-    
-    phone = "1150440023"
-    message = "bhjkbbkjlkl"
-    response = open_page()
-    # status = check_load()
-    time.sleep(7)
-    send_msg(phone, message)
-    time.sleep(3)
-    # exit_webpg()
+    df = open_mock()
+    send_batch(df)
