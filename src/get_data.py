@@ -23,7 +23,7 @@ def data_info(df,column):
 
 
 with open("../key/sheets_url.json") as file: 
-        data = json.load(file) 
+    data = json.load(file) 
 
 
 def extrair_precos(texto):
@@ -46,7 +46,6 @@ def preprocess_respostas(df):
     name_columns= ['time','name_paciente','e-mail','phone_paciente','area','description','max_price','price','phone2','urgencie','free_service','sexual_identity','profissional','whatsapp']
     df.columns = name_columns
     type_columns=[str,str,str,int,str,str,int,int,int,str,str,str,str,str]
-    print(df['price'].head(286))
     df = df.dropna(axis=1, how='all')
 
     # area column
@@ -63,7 +62,6 @@ def preprocess_respostas(df):
     
     # Price Column
     df['price'] = df['price'].apply(extrair_precos)
-    print(df['price'].head(286))
     
     return df
 
@@ -100,6 +98,12 @@ def open_profissional():
     sheets_professional = data['url_profissionais']
     df = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{sheets_professional}/export?format=csv")
     df = preprocess_profissional(df)
+    return df
+
+
+def open_mock():
+    df = pd.read_csv("../csv/mock.csv", sep=",",encoding="utf-8",index_col=0)
+    df.reset_index(inplace=True)
     return df
 
 
