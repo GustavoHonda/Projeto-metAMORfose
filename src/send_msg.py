@@ -1,7 +1,7 @@
 import pyautogui as pg
 import webbrowser as web
 import time
-from get_data import open_profissional, open_respostas, open_mock
+from src.get_data import open_profissional, open_respostas, open_mock
 import bs4, requests
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -12,12 +12,15 @@ from selenium.webdriver.chrome.options import Options
 import subprocess
 from pathlib import Path
 
+
 # Erros/implementações que tem pra fazer/corrigir nesse módulo:
 # 1. (FEITO) Ao buscar a imagem search_bar na tela do usuário o tamanho da imagem é levado em consideração
 # 2. check_load() acessa web.whatsapp.com e retorna apenas a tela de loading da aplicação e não sabemos se a tela carregou ou não 
 # 3. Utilizar o editacódigo para fazer o envio de mensagens
 # 4. Tomar cuidade para a conta não ser bloqueada por utilização de chatbot (colocar timers e mimetizar o comportamento de um usuário real) 
 # 5. Melhorar a função de enviar mensagens para que ela não dependa de uma imagem
+
+
 def enable_localhost_execution():
     subprocess.run("xhost + local:", shell = True, executable="/bin/bash")
 
