@@ -25,11 +25,8 @@ def test_match():
         {"name_paciente": "Paciente A", "area": "psicologia", "datetime": datetime(2024, 1, 1), "phone_paciente": "999", "price": 100},
         {"name_paciente": "Paciente B", "area": "psicologia", "datetime": datetime(2024, 1, 2), "phone_paciente": "888", "price": 150},
     ])
-    df_matches = pd.DataFrame([
-        {"phone_professional": "111", "phone_paciente": "999"}  # Paciente A já foi pareado
-    ])
     
-    result = match(df_profissional, df_resposta, df_matches)
+    result = match(df_profissional, df_resposta)
     assert not result.empty
     assert result.shape[0] == 1
     assert result.iloc[0]["phone_paciente"] == "888"

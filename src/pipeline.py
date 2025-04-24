@@ -7,6 +7,7 @@ SAFE_TO_EXEC=False
 def main():
     df_profissional = open_profissional()
     df_respostas = open_respostas()
+    
     matched = match(df_profissional, df_respostas)
     if SAFE_TO_EXEC:
         response = send_batch(matched)

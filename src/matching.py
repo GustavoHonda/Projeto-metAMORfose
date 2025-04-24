@@ -1,4 +1,5 @@
 import pandas as pd
+import pandasql as ps
 from src.get_data import data_info, open_matches, save_matches, open_profissional, open_respostas
 
 # Erros/implementações que tem pra fazer/corrigir nesse módulo:
@@ -9,15 +10,17 @@ from src.get_data import data_info, open_matches, save_matches, open_profissiona
 
 
 def find_matches(prof, df_resposta, df_matches):
-    prof_phone = prof["phone_professional"]
-    prof_area = prof["area"]
-    already_matched_professional_pacient = df_matches[df_matches["phone_professional"] == prof_phone]
-    already_matched_professional_pacient = already_matched_professional_pacient["datetime"]
+    # query = "SELECT * FROM df_matches"
+    # df = ps.sqldf(query,locals())
     
-    print(already_matched_professional_pacient)
-    new_matches = df_resposta[df_resposta["area"] == prof_area]
-    new_matches = new_matches[~new_matches["datetime"].isin(already_matched_professional_pacient)]
+    already_matched_professional_pacient = df_matches[df_matches["phone_professional"] == prof["phone_professional"]]
+    new_matches = df_resposta[df_resposta["area"] == prof["area"]]
+    
+    new_matches = new_matches[new_matches["datetime"].isin(already_matched_professional_pacient["datetime"])]
     new_matches = new_matches.sort_values(by="datetime")
+    
+    new_matches['datetime'] =new_matches["datetime"].apply(lambda x: x.isoformat() if pd.notnull(x) else None)
+    
     return new_matches.head(2)
 
 
@@ -32,7 +35,7 @@ def match(df_profissional, df_resposta):
                 "name_paciente": match["name_paciente"],
                 "phone_paciente": match["phone_paciente"],
                 "area": match["area"],
-                "price": match["price"],
+                "price": match["price"][0],
                 "datetime": match["datetime"]
             })
     new_matches = pd.DataFrame(results)
@@ -50,9 +53,10 @@ def match(df_profissional, df_resposta):
 def main():
     df_profissional = open_profissional()[["name_professional","area", "phone_professional", "price", "freq_professional"]]
     df_resposta = open_respostas()[["name_paciente", "area", "datetime", "phone_paciente", "price","freq_client"]]
-    
-    # data_info(df_profissional, "area")
-    # data_info(df_resposta, "area")
+    df_resposta = df_resposta.head(3)
+    # print(df_resposta)
+    data_info(df_profissional, "area")
+    data_info(df_resposta, "area")
     
     matched = match(df_profissional, df_resposta)
     

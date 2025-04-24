@@ -127,7 +127,9 @@ def open_matches():
 def save_matches(df):
     # data_info(df,'datetime')
     # df["datetime"] = df["datetime"].dt.strftime('%Y-%m-%d %H:%M:%S')
-    df["price"] = df["price"].apply(lambda x: x[0])
+    # df["price"] = df["price"].apply(lambda x: x[0] if x is list  else x)
+    # data_info(df,"price")
+    print(df["price"])
     client = set_credentials()
     sheet = client.open("matches").sheet1
     data = [df.columns.tolist()] + df.values.tolist()
