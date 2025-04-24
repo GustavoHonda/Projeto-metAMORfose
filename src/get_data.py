@@ -86,7 +86,6 @@ def preprocess_profissional(df) -> pd.DataFrame:
     # Setting correct types
     type_columns = [str,str,str,int,int,object,str,int]
     for i,coluna in enumerate(df.columns):
-        print(i)
         df.loc[:,coluna] = df[coluna].astype(str).astype(type_columns[i])
     return df
 
@@ -107,6 +106,30 @@ def open_profissional():
     df = get_data(sheets_name="2025 Profissionais", client=client)
     df = preprocess_profissional(df)
     return df
+
+
+def open_matches():
+    try:
+        client = set_credentials()
+        df = get_data(sheets_name="matches", client=client)
+        if df is None or df.empty:
+            return pd.DataFrame(columns=["phone_professional", "name_paciente", "phone_paciente", "area", "price", "datetime"])
+        return df
+    except Exception as e:
+        print(f"Error: {e}")
+        print(f"Error in open_matchings function.")
+        return pd.DataFrame()
+    
+    
+    
+def save_matches(df):
+    df["datetime"] = df["datetime"].dt.strftime('%Y-%m-%d %H:%M:%S')
+    df["price"] = df["price"].apply(lambda x: x[0])
+    client = set_credentials()
+    sheet = client.open("matches").sheet1
+    data = [df.columns.tolist()] + df.values.tolist()
+    sheet.update("A1", data)
+    print("Data saved successfully!")
 
 
 def open_mock():
