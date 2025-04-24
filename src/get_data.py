@@ -11,21 +11,23 @@ from oauth2client.service_account import ServiceAccountCredentials
 # Erros/implementações que tem pra fazer/corrigir nesse módulo:
 # 1.coluna price de df_respostas tem descrição (str) dos preços solicitados, precisa transformar para (int)
 # 2.extrair mais informações da descrição das respostas de cada paciente(implementação complicada)
+# 3. Acrescentar type columns para cada coluna do cliente
 
-
-def data_info(df,column):
+def data_info(df, column):
     """
-    Função auxiliar que mostra os valores únicos e tipo de certa coluna do dataframe
+    Função auxiliar que mostra os valores únicos, tipo e frequência de uma coluna do DataFrame.
 
     Args:
-        df (pd.Dataframe): Dataframe analisado
-        column (str): coluna analisada
+        df (pd.DataFrame): DataFrame analisado
+        column (str): Nome da coluna analisada
     """
-    
-    print(df[column].unique())
-    print(df[column].dtype)
+    print(f"Coluna: {column}")
+    print(f"Tipo de dado: {df[column].dtype}\n")
+    print("Frequência de valores únicos:")
+    print(df[column].value_counts(dropna=False))  # inclui NaNs se houver
 
-file_path = os.path.join(os.path.dirname(__file__), "../key/sheets_url.json")
+
+file_path = "./key/sheets_url.json"
 with open(file_path) as file: 
     data = json.load(file) 
 
@@ -47,9 +49,10 @@ def extrair_precos(texto):
     
 
 def preprocess_respostas(df):
-    name_columns= ['time','name_paciente','e-mail','phone_paciente','area','description','max_price','price','phone2','urgencie','free_service','sexual_identity','profissional','whatsapp']
+    df['freq_client'] = '0'
+    name_columns= ['time','name_paciente','e-mail','phone_paciente','area','description','max_price','price','phone2','urgencie','free_service','sexual_identity','profissional','whatsapp','freq_client']
     df.columns = name_columns
-    type_columns=[str,str,str,int,str,str,int,int,int,str,str,str,str,str]
+    type_columns=[str,str,str,int,str,str,int,int,int,str,str,str,str,str,int]
     df = df.dropna(axis=1, how='all')
 
     # area column
@@ -71,10 +74,10 @@ def preprocess_respostas(df):
 
 def preprocess_profissional(df) -> pd.DataFrame:
     # Adding new data
-    df['freq'] = '0'
+    df['freq_professional'] = '0'
     
     # Rename columns
-    name_columns = ['name_professional','area','CRN','phone_professional','price','gender','freq']
+    name_columns = ['name_professional','area','CRN','phone_professional','price','gender','freq_professional']
     df.columns = name_columns
     
     # Remove unwanted data
@@ -121,9 +124,9 @@ def open_matches():
         return pd.DataFrame()
     
     
-    
 def save_matches(df):
-    df["datetime"] = df["datetime"].dt.strftime('%Y-%m-%d %H:%M:%S')
+    # data_info(df,'datetime')
+    # df["datetime"] = df["datetime"].dt.strftime('%Y-%m-%d %H:%M:%S')
     df["price"] = df["price"].apply(lambda x: x[0])
     client = set_credentials()
     sheet = client.open("matches").sheet1
@@ -136,6 +139,7 @@ def open_mock():
     df = pd.read_csv("../csv/mock.csv", sep=",",encoding="utf-8",index_col=0)
     df.reset_index(inplace=True)
     return df
+
 
 ##### DEPRECATED ####
 # def send_data(row, col, value):
