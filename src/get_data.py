@@ -3,6 +3,9 @@ import json
 import requests
 import re
 import os
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+    
 
 
 # Erros/implementações que tem pra fazer/corrigir nesse módulo:
@@ -83,20 +86,25 @@ def preprocess_profissional(df) -> pd.DataFrame:
     # Setting correct types
     type_columns = [str,str,str,int,int,object,str,int]
     for i,coluna in enumerate(df.columns):
-            df.loc[:,coluna] = df[coluna].astype(str).astype(type_columns[i])
+        print(i)
+        df.loc[:,coluna] = df[coluna].astype(str).astype(type_columns[i])
     return df
 
 
 def open_respostas():
-    sheets_respostas = data['url_respostas']
-    df = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{sheets_respostas}/export?format=csv")
+    # sheets_respostas = data['url_respostas']
+    # df = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{sheets_respostas}/export?format=csv")
+    client = set_credentials()
+    df = get_data(sheets_name="Respostas", client=client)
     df = preprocess_respostas(df)
     return df
 
 
 def open_profissional():
-    sheets_professional = data['url_profissionais']
-    df = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{sheets_professional}/export?format=csv")
+    # sheets_professional = data['url_profissionais']
+    # df = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{sheets_professional}/export?format=csv")
+    client = set_credentials()
+    df = get_data(sheets_name="2025 Profissionais", client=client)
     df = preprocess_profissional(df)
     return df
 
@@ -106,23 +114,49 @@ def open_mock():
     df.reset_index(inplace=True)
     return df
 
+##### DEPRECATED ####
+# def send_data(row, col, value):
+#     payload = {"row": row, "col": col, "value": value}
+#     url = data['url_google_script']
+#     response = requests.post(url, data=payload)
+#     if str(response) == "<Response [200]>":
+#             print("Request Accepted!")
+#     else:
+#             print(response)
+#     return response
 
-def send_data(row, col, value):
-    payload = {"row": row, "col": col, "value": value}
-    url = data['url_google_script']
-    response = requests.post(url, data=payload)
-    if str(response) == "<Response [200]>":
-            print("Request Accepted!")
-    else:
-            print(response)
-    return response
+
+def set_credentials():
+    scope = [
+        "https://spreadsheets.google.com/feeds",
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
+    ]
+    creds = ServiceAccountCredentials.from_json_keyfile_name("./key/sheets-service-account.json", scope)
+    client = gspread.authorize(creds)
+    return client
+
+
+def send_data(sheets_name="matches",df=None):
+    client = set_credentials()
+    sheet = client.open(sheets_name).sheet1
+    data = [df.columns.tolist()] + df.values.tolist()
+    sheet.update("A1", data)  
+    
+    
+def get_data(sheets_name = "matches",client=None):
+    sheet = client.open(sheets_name).sheet1
+    data = sheet.get_all_records()
+    df = pd.DataFrame(data)
+    return df
 
 
 def main():
-    # Get dataframes of resposta & profissional
     df_resposta = open_respostas()
     df_profissional = open_profissional()
-    response = send_data(40,1,"valor a ser inserido")
+    print(df_resposta)
+    print(df_profissional)
+    # send_data(sheets_name="matches",df=df,client=client)
 
 
 if __name__ == "__main__":

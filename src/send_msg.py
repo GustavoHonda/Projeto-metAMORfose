@@ -109,10 +109,10 @@ def send_batch(df):
     time.sleep(7)
     pos = locate_serch_bar()
     try:
-        df = df[['first_name','last_name','phone_professional','phone_pacient','description','price']]
+        df = df[['name','phone_professional','phone_pacient','description','price']]
         n_total = len(df)
         for index, row in df.iterrows():
-            text = text_message(row["first_name"], row["last_name"], row["phone_pacient"], row["description"], row["price"])
+            text = text_message(row["name"], row["phone_pacient"], row["description"], row["price"])
             send_msg(row["phone_professional"], text, pos)
             print(f"{index + 1} de {n_total} mensagens enviadas")
     except Exception as e:
@@ -124,9 +124,9 @@ def send_batch(df):
     exit_webpg()
 
 
-def text_message(first_name, last_name, phone, description, price):
+def text_message(name, phone, description, price):
     text = (f"Segue indicação de paciente:",
-            f"Nome: {first_name} {last_name}",
+            f"Nome: {name}",
             f"Contato: {phone}",
             f"Problemas: {description}",
             f"Valor sugerido: {price}R$")
