@@ -1,0 +1,9 @@
+key/
+csv/
+__pycache__/
+.pytest_cache__/
+main.spec
+build/
+.venv/
+test/__pycache__/*
+dist/main
