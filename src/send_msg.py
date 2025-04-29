@@ -71,7 +71,7 @@ def check_load(): # Ainda não funcional
     
 def locate_serch_bar():
     try:
-        path = Path("../img/").resolve()
+        path = Path("./img/").resolve()
         for path in path.iterdir():
             path = str(path)
             search_bar = pg.locateOnScreen(path) 
@@ -108,6 +108,7 @@ def send_batch(df):
     response = open_page()
     time.sleep(7)
     pos = locate_serch_bar()
+    print(pos)
     try:
         df = df[['name','phone_professional','phone_pacient','description','price']]
         n_total = len(df)

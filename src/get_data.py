@@ -138,7 +138,7 @@ def save_matches(df):
 
 
 def open_mock():
-    df = pd.read_csv("../csv/mock.csv", sep=",",encoding="utf-8",index_col=0)
+    df = pd.read_csv("./csv/mock.csv", sep=",",encoding="utf-8",index_col=0)
     df.reset_index(inplace=True)
     return df
 
