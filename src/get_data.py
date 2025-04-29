@@ -66,8 +66,11 @@ def preprocess_respostas(df):
     df.loc[:,'datetime'] = pd.to_datetime(df['time'], dayfirst=True)
     df[['date','time']] = df['time'].str.split(" ", expand= True )
     
+    df["datetime"] = df["datetime"].dt.strftime('%Y-%m-%d %H:%M:%S')
+    
     # Price Column
     df['price'] = df['price'].apply(extrair_precos)
+    df["price"] = df["price"].apply(lambda x: x[0] if isinstance(x, list) and len(x) > 0 else 0)
     
     return df
 
@@ -97,7 +100,7 @@ def open_respostas():
     # sheets_respostas = data['url_respostas']
     # df = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{sheets_respostas}/export?format=csv")
     client = set_credentials()
-    df = get_data(sheets_name="Respostas", client=client)
+    df = get_data(sheets_name="Respostas",page="Respostas", client=client)
     df = preprocess_respostas(df)
     return df
 
@@ -106,7 +109,7 @@ def open_profissional():
     # sheets_professional = data['url_profissionais']
     # df = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{sheets_professional}/export?format=csv")
     client = set_credentials()
-    df = get_data(sheets_name="2025 Profissionais", client=client)
+    df = get_data(sheets_name="Profissionais",page="Página1", client=client)
     df = preprocess_profissional(df)
     return df
 
@@ -114,7 +117,7 @@ def open_profissional():
 def open_matches():
     try:
         client = set_credentials()
-        df = get_data(sheets_name="matches", client=client)
+        df = get_data(sheets_name="db-metAMORfose", page="Matches", client=client)
         if df is None or df.empty:
             return pd.DataFrame(columns=["phone_professional", "name_paciente", "phone_paciente", "area", "price", "datetime"])
         return df
@@ -125,10 +128,6 @@ def open_matches():
     
     
 def save_matches(df):
-    # data_info(df,'datetime')
-    # df["datetime"] = df["datetime"].dt.strftime('%Y-%m-%d %H:%M:%S')
-    # df["price"] = df["price"].apply(lambda x: x[0] if x is list  else x)
-    # data_info(df,"price")
     print(df["price"])
     client = set_credentials()
     sheet = client.open("matches").sheet1
@@ -166,15 +165,17 @@ def set_credentials():
     return client
 
 
-def send_data(sheets_name="matches",df=None):
+def send_data(sheets_name="db-metAMORfose", page = None,df=None):
     client = set_credentials()
-    sheet = client.open(sheets_name).sheet1
+    sheet = client.open(sheets_name)
+    sheet = sheet.worksheet(page)
     data = [df.columns.tolist()] + df.values.tolist()
     sheet.update("A1", data)  
     
     
-def get_data(sheets_name = "matches",client=None):
-    sheet = client.open(sheets_name).sheet1
+def get_data(sheets_name = "db-metAMORfose", page = None,client=None):
+    sheet = client.open(sheets_name)
+    sheet = sheet.worksheet(page)
     data = sheet.get_all_records()
     df = pd.DataFrame(data)
     return df
@@ -183,9 +184,10 @@ def get_data(sheets_name = "matches",client=None):
 def main():
     df_resposta = open_respostas()
     df_profissional = open_profissional()
-    print(df_resposta)
-    print(df_profissional)
-    # send_data(sheets_name="matches",df=df,client=client)
+    # print(df_resposta)
+    # print(df_profissional)
+    send_data(sheets_name="db-metAMORfose",df=df_resposta,page="Respostas")
+    send_data(sheets_name="db-metAMORfose",df=df_profissional,page="Profissionais")
 
 
 if __name__ == "__main__":
