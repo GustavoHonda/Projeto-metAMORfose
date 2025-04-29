@@ -32,3 +32,5 @@ pyinstaller --onefile main.py
 
 pyinstaller --onefile --noconsole main.py 
 ```
+
+teste2
