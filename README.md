@@ -34,3 +34,43 @@ pyinstaller --onefile --noconsole main.py
 ```
 
 teste2
+
+# adicionar no pacote 
+
+git add README.md
+
+# salvar na maquina a versao do pacote
+
+ git commit -m "Edited README.md"
+
+# 
+
+ git status 
+
+# download 
+
+ git clone
+
+ # caminho do arquivo
+
+
+ git add README.md
+
+ # O pacote deve estar salvo para enviar 
+ git commit -m "Atualiza README.md"
+
+ # enviar pacote na internet no grupo
+
+ git push 
+
+ # 
+
+ git pull 
+
+python src/exercicio2.py
+
+# python src/exercicio2.py
+
+# python -m src.matching
+
+# pytest : Verifica todos os testes que estao passando
