@@ -7,7 +7,7 @@ df_profissional = pd.DataFrame([
     ])
 df_resposta = pd.DataFrame([
     {"name_paciente": "Paciente A", "area": "psicologia", "datetime": "31/08/2024 21:33:09", "phone_paciente": "(11)912345678", "price": 100},
-    {"name_paciente": "Paciente B", "area": "psicologia", "datetime": "31/08/2024 21:33:08", "phone_paciente": "888", "price": 150},
+    {"name_paciente": "Paciente B", "area": "psicologia", "datetime": "31/08/2024 21:33:08", "phone_paciente": "(11)912345678", "price": 150},
 ])
 result = match(df_profissional, df_resposta)
 
