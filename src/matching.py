@@ -1,7 +1,5 @@
 import pandas as pd
 from pandasql import sqldf
-import logging
-logging.basicConfig(level=logging.DEBUG)
 
 from src.get_data import data_info, open_matches, save_matches, open_profissional, open_respostas
 
@@ -11,11 +9,7 @@ from src.get_data import data_info, open_matches, save_matches, open_profissiona
 # 3. profissional não pode receber o mesmo contato de paciente 2 vezes
 # 4. cada profissional deve receber clientes diferentes
 
-
-def main():
-    df_profissional = open_profissional()[["name_professional","area", "phone_professional", "price", "freq_professional"]]
-    df_resposta = open_respostas()[["name_paciente", "area", "datetime", "phone_paciente", "price","freq_client"]]
-
+def match(df_profissional, df_resposta):
     query = """
     SELECT *
     FROM (
@@ -37,23 +31,35 @@ def main():
     WHERE rn = 1
     ORDER BY data_cadastro DESC
     """
-    pysqldf = sqldf(query, locals())
-    # Executar a consulta
-    resultado = pysqldf
+    resultado = sqldf(query, locals())
+    return resultado
+
+def main():
+    df_profissional = open_profissional()[["name_professional","area", "phone_professional", "price", "freq_professional"]]
+    df_resposta = open_respostas()[["name_paciente", "area", "datetime", "phone_paciente", "price","freq_client"]]
+    caminho_arquivo_csv = './csv/resultado_pacientes_profissionais.csv'
+
+    resultado = match(df_profissional, df_resposta)
+    print(resultado.shape[0])
     print(resultado)
-
-    # Salvar os dados em arquivos Excel e CSV
-
-    # Caminho para salvar os arquivos
-    caminho_arquivo_excel = 'resultado_pacientes_profissionais.xlsx'
-    caminho_arquivo_csv = 'resultado_pacientes_profissionais.csv'
-
-    # Ginecologia = caminho_arquivo_csv.where(caminho_arquivo_csv['area_comum'] = 'Ginecologia')
 
     # Salvar em CSV
     resultado.to_csv(caminho_arquivo_csv, index=False)
 
     print(f"Arquivos salvos em: {caminho_arquivo_csv}")
     df_resultado = pd.read_csv(caminho_arquivo_csv)
+    
+    
+def main2():
+    df_profissional = pd.DataFrame([
+        {"name_professional": "Prof A", "area": "psicologia", "phone_professional": "111", "price": 200, "freq": 0}
+    ])
+    df_resposta = pd.DataFrame([
+        {"name_paciente": "Paciente A", "area": "psicologia", "datetime": "31/08/2024 21:33:09", "phone_paciente": "999", "price": 100},
+        {"name_paciente": "Paciente B", "area": "psicologia", "datetime": "31/08/2024 21:33:08", "phone_paciente": "888", "price": 150},
+    ])
+    result = match(df_profissional, df_resposta)    
+    print(result)
+
 if __name__ == "__main__":
-    main()
+    main2()

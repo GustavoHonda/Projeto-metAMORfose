@@ -66,7 +66,7 @@ def preprocess_respostas(df):
     df.loc[:,'datetime'] = pd.to_datetime(df['time'], dayfirst=True)
     df[['date','time']] = df['time'].str.split(" ", expand= True )
     
-    df["datetime"] = df["datetime"].dt.strftime('%Y-%m-%d %H:%M:%S')
+    # df["datetime"] = df["datetime"].dt.strftime(f'%Y-%m-%d %H:%M:%S')
     
     # Price Column
     df['price'] = df['price'].apply(extrair_precos)
