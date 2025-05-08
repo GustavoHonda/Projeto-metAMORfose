@@ -7,4 +7,7 @@ build/
 .venv/
 test/__pycache__/*
 dist/main
+dist/main.exe
+logs/
+venv/
 Perguntas_p_luiza

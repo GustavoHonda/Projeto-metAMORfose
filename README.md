@@ -31,7 +31,13 @@ pyinstaller --onefile main.py
 # ou também sem linha de comando
 
 pyinstaller --onefile --noconsole main.py 
+
+# com logo fica
+
+pyinstaller --onefile --icon=img/logo.png  main.py 
+
 ```
+
 
 teste2
 

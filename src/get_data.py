@@ -5,8 +5,10 @@ import re
 import os
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-    
+from src.utils.path import get_project_root
+from pathlib import Path
 
+base_path = get_project_root()
 
 # Erros/implementações que tem pra fazer/corrigir nesse módulo:
 # 1.coluna price de df_respostas tem descrição (str) dos preços solicitados, precisa transformar para (int)
@@ -25,11 +27,6 @@ def data_info(df, column):
     print(f"Tipo de dado: {df[column].dtype}\n")
     print("Frequência de valores únicos:")
     print(df[column].value_counts(dropna=False))  # inclui NaNs se houver
-
-
-file_path = "./key/sheets_url.json"
-with open(file_path) as file: 
-    data = json.load(file) 
 
 
 def extrair_precos(texto):
@@ -137,7 +134,8 @@ def save_matches(df):
 
 
 def open_mock():
-    df = pd.read_csv("./csv/mock.csv", sep=",",encoding="utf-8",index_col=0)
+    mock_path = Path(base_path, "csv", "mock.csv")
+    df = pd.read_csv(mock_path, sep=",",encoding="utf-8",index_col=0)
     df.reset_index(inplace=True)
     return df
 
@@ -160,7 +158,10 @@ def set_credentials():
         "https://www.googleapis.com/auth/spreadsheets",
         "https://www.googleapis.com/auth/drive"
     ]
-    creds = ServiceAccountCredentials.from_json_keyfile_name("./key/sheets-service-account.json", scope)
+
+    
+    credentials_path = Path(base_path, "key", "sheets-service-account.json")
+    creds = ServiceAccountCredentials.from_json_keyfile_name(credentials_path, scope)
     client = gspread.authorize(creds)
     return client
 
