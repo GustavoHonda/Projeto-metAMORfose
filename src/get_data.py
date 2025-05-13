@@ -47,7 +47,7 @@ def extrair_precos(texto):
 
 def preprocess_respostas(df):
     df['freq_client'] = '0'
-    name_columns= ['time','name_paciente','e-mail','phone_paciente','area','description','max_price','price','phone2','urgencie','free_service','sexual_identity','profissional','whatsapp','freq_client']
+    name_columns= ['id','time','name_paciente','e-mail','phone_paciente','area','description','max_price','price','phone2','urgencie','free_service','sexual_identity','profissional','whatsapp','freq_client']
     df.columns = name_columns
     type_columns=[str,str,str,int,str,str,int,int,int,str,str,str,str,str,int]
     df = df.dropna(axis=1, how='all')
@@ -77,7 +77,7 @@ def preprocess_profissional(df) -> pd.DataFrame:
     df['freq_professional'] = '0'
     
     # Rename columns
-    name_columns = ['name_professional','area','CRN','phone_professional','price','gender','freq_professional']
+    name_columns = ['id','name_professional','area','CRN','phone_professional','price','gender','freq_professional']
     df.columns = name_columns
     
     # Remove unwanted data
@@ -87,7 +87,7 @@ def preprocess_profissional(df) -> pd.DataFrame:
     df.loc[:,'price'] = df['price'].apply(lambda x: x.replace("+","") if type(x) == str else x )
     
     # Setting correct types
-    type_columns = [str,str,str,int,int,object,str,int]
+    type_columns = [int,str,str,str,int,int,object,str,int]
     for i,coluna in enumerate(df.columns):
         df.loc[:,coluna] = df[coluna].astype(str).astype(type_columns[i])
     return df
