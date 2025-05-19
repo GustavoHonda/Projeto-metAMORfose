@@ -21,8 +21,10 @@ base_path = get_project_root()
 def enable_localhost_execution():
     os_name = platform.system()
     if os_name == "Linux":
-        subprocess.run("xhost +local:", shell=True, executable="/bin/bash")
+        subprocess.run("xhost + local:", shell=True, executable="/bin/bash")
+        print("linux")
     elif os_name == "Windows":
+        print("windows")
         return 0
     else:
         print("Sistema operacional não suportado")
@@ -49,7 +51,8 @@ def direct_msg(phone, message):
     
 def open_page():
     enable_localhost_execution()
-    response = web.open("https://web.whatsapp.com")
+    google = "/usr/bin/google-chrome" if platform.system() == "Linux" else "C:/Program Files/Google/Chrome/Application/chrome.exe"
+    response = web.get(google).open("https://web.whatsapp.com")
     if not response:
         raise ConnectionError
     else:
@@ -62,38 +65,39 @@ def locate_img(path):
         search_bar = pg.locateOnScreen(path, confidence=0.8) 
         return search_bar
     except Exception as e:
-        print(f"failed to locate image: {path}")
+        print(f"Exception: in locating {path}")
         return None
 
 
-def locate_serch_bar():
-        path_img = Path(base_path, "img")
-        for path in path_img.iterdir():
-            path = str(path)
-            search_bar = locate_img(path)
-            if search_bar is not None:
-                break
-        if search_bar is None:
-            print("Error: search_bar not found")
-            exit_webpg()
-            return -1
-        search_bar_x, search_bar_y = pg.center(search_bar) 
-        return search_bar_x, search_bar_y
+def locate_search_bar():
+    path_img = Path(base_path, "img")
+    for path in path_img.iterdir():
+        path = str(path)
+        search_bar = locate_img(path)
+        if search_bar is not None:
+            break
+    if search_bar is None:
+        print("Error: search_bar not found")
+        exit_webpg()
+        return -1
+    search_bar_x, search_bar_y = pg.center(search_bar) 
+    print(search_bar_x, search_bar_y)
+    return search_bar_x, search_bar_y
     
     
 def send_msg(phone, message, search_bar_pos):
     try:
         time.sleep(1) 
         pg.click(search_bar_pos[0], search_bar_pos[1])
-        pg.write(phone) 
+        pg.write(phone)
         pg.press('enter') 
-
-        time.sleep(1)
+        
+        time.sleep(2)
         for line in message:
             pg.write(line)
             pg.hotkey('shift', 'enter')
-
-        time.sleep(1)
+        
+        time.sleep(2)
         pg.press("enter") 
         # pg.click(search_bar_pos[0] + 250, search_bar_pos[1])
     except Exception as e:
@@ -105,8 +109,8 @@ def send_msg(phone, message, search_bar_pos):
 
 def send_batch(df):
     response = open_page()
-    time.sleep(10)
-    pos = locate_serch_bar()
+    time.sleep(40)
+    pos = locate_search_bar()
     try:
         df = df[['name','phone_professional','phone_pacient','description','price']]
         n_total = len(df)

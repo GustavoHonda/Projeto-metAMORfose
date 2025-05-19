@@ -59,7 +59,7 @@ def main2():
         {"name_paciente": "Paciente B", "area": "psicologia", "datetime": "31/08/2024 21:33:08", "phone_paciente": "888", "price": 150},
     ])
     result = match(df_profissional, df_resposta)    
-    print(result)
+    result.to_csv("./csv/matching_results.csv")
 
 if __name__ == "__main__":
-    main()
+    main2()
