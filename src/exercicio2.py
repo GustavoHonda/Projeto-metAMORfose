@@ -38,14 +38,14 @@ df_paciente = pd.DataFrame({
 })
 
 # DataFrame de profissionais (agora com 6 profissionais)
-df_profissional = pd.DataFrame({
-    'nome_profissional': [
+df_professional = pd.DataFrame({
+    'nome_professional': [
         'Dr. João', 'Dra. Paula', 'Dr. Marcos', 'Dra. Renata', 'Dr. André', 'Dra. Camila'
     ],
     'area': [
         'Cardiologia', 'Dermatologia', 'Ortopedia', 'Ginecologia', 'Neurologia', 'Ortopedia'
     ],
-    'telefone_profissional': [
+    'telefone_professional': [
         'wa.me/5511978078949', 'wa.me/5511950440023', 'wa.me/5511976154853', 'wa.me/5585985410805', 'wa.me/5585985410805', 'wa.me/5516996409979'
     ],
     'valor_aceite': [
@@ -68,13 +68,13 @@ FROM (
         p.telefone_paciente,
         p.valor_consulta,
         p.data_cadastro,
-        prof.nome_profissional,
-        prof.area AS area_profissional,
-        prof.telefone_profissional,
+        prof.nome_professional,
+        prof.area AS area_professional,
+        prof.telefone_professional,
         prof.valor_aceite,
         ROW_NUMBER() OVER (PARTITION BY p.nome_paciente ORDER BY prof.valor_aceite ASC) as rn
     FROM df_paciente p
-    JOIN df_profissional prof
+    JOIN df_professional prof
         ON p.area = prof.area
 ) t
 WHERE rn = 1
@@ -124,11 +124,11 @@ time.sleep(10)
 print("Escaneie o QR Code do WhatsApp Web...")
 time.sleep(10)  # ajuste se precisar de mais tempo
 
-# 3. Enviar mensagem para cada profissional
+# 3. Enviar mensagem para cada professional
 for _, row in df_resultado.iterrows():
-    telefone = row['telefone_profissional']
+    telefone = row['telefone_professional']
     mensagem = f"""
-Olá {row['nome_profissional']}, tudo bem?
+Olá {row['nome_professional']}, tudo bem?
 
 Você foi conectado com um paciente da área de {row['area_comum']}:
 
@@ -167,7 +167,7 @@ try:
     )
     botao_enviar.click()
 
-    print(f"Mensagem enviada para {row['nome_profissional']}")
+    print(f"Mensagem enviada para {row['nome_professional']}")
 
 except Exception as e:
     print(f"Erro ao enviar mensagem para {telefone}: {e}")

@@ -1,7 +1,7 @@
 import pyautogui as pg
 import webbrowser as web
 import time
-from src.get_data import open_profissional, open_respostas, open_mock
+from src.get_data import open_professional, open_respostas, open_mock
 import subprocess
 from pathlib import Path
 import platform
@@ -128,7 +128,7 @@ def send_batch(df):
 
 
 def text_message(name, phone, description, price):
-    text = (f"Segue indicação de paciente:",
+    text = (f"Segue conexão com paciente:",
             f"Nome: {name}",
             f"Contato: {phone}",
             f"Problemas: {description}",
@@ -137,7 +137,5 @@ def text_message(name, phone, description, price):
 
 
 if __name__ == '__main__':
-    df_respostas = open_respostas()
-    df_profissional = open_profissional()
     df = open_mock()
     send_batch(df)

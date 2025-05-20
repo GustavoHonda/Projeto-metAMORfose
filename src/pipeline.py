@@ -1,20 +1,26 @@
-from src.get_data import open_profissional, open_respostas, open_mock
+from src.get_data import open_professional, open_respostas, open_mock, open_matches
+from src.get_data import open_mock_professional, open_mock_respostas
 from src.send_msg import send_batch 
 from src.matching import match
 
 SAFE_TO_EXEC=False
 
 def main():
-    df_profissional = open_profissional()
-    df_respostas = open_respostas()
+
+    df_professional = open_mock_professional()
+    df_respostas = open_mock_respostas()
+    df_matchings = open_matches()
     
-    matched = match(df_profissional, df_respostas)
-    mock_matched = open_mock()
+    print(df_professional)
+    
+    matched = match(df_professional, df_respostas, df_matchings)
+    exit(0)
+    # mock_matched = open_mock()
     if SAFE_TO_EXEC:
         response = send_batch(matched)
         return 0
     else:
-        response = send_batch(mock_matched)
+        response = send_batch(matched)
         print(response)
         return 0
     

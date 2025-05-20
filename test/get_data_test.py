@@ -34,7 +34,7 @@ def test_preprocess_respostas_minimal(monkeypatch):
         'urgencie': 'média',
         'free_service': 'não',
         'sexual_identity': 'masculino',
-        'profissional': 'nenhum',
+        'professional': 'nenhum',
         'whatsapp': 'sim'
     }])
 

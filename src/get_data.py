@@ -26,7 +26,7 @@ def data_info(df, column):
     print(f"Coluna: {column}")
     print(f"Tipo de dado: {df[column].dtype}\n")
     print("Frequência de valores únicos:")
-    print(df[column].value_counts(dropna=False))  # inclui NaNs se houver
+    print(df[column].value_counts())  # inclui NaNs se houver
 
 
 def extrair_precos(texto):
@@ -47,7 +47,7 @@ def extrair_precos(texto):
 
 def preprocess_respostas(df):
     df['freq_client'] = '0'
-    name_columns= ['id','time','name_paciente','e-mail','phone_paciente','area','description','max_price','price','phone2','urgencie','free_service','sexual_identity','profissional','whatsapp','freq_client']
+    name_columns= ['id','time','name_paciente','e-mail','phone_paciente','area','description','max_price','price','phone2','urgencie','free_service','sexual_identity','professional','whatsapp','freq_client']
     df.columns = name_columns
     type_columns=[str,str,str,int,str,str,int,int,int,str,str,str,str,str,int]
     df = df.dropna(axis=1, how='all')
@@ -55,7 +55,6 @@ def preprocess_respostas(df):
     # area column
     df.loc[:,"area"] = df["area"].str.split(",")
     df = df.explode('area')
-    df.loc[:,'area'] = df['area'].str.replace("Médico","", regex=True)
     df.loc[:,'area'] = df['area'].str.replace(":","", regex=True)
     df.loc[:,'area'] = df['area'].str.strip()
 
@@ -72,13 +71,19 @@ def preprocess_respostas(df):
     return df
 
 
-def preprocess_profissional(df) -> pd.DataFrame:
+def preprocess_professional(df) -> pd.DataFrame:
     # Adding new data
     df['freq_professional'] = '0'
     
     # Rename columns
     name_columns = ['id','name_professional','area','CRN','phone_professional','price','gender','freq_professional']
     df.columns = name_columns
+    
+    #area column
+    df.loc[:,"area"] = df["area"].str.split(",")
+    df = df.explode('area')
+    df.loc[:,'area'] = df['area'].str.replace(":","", regex=True)
+    df.loc[:,'area'] = df['area'].str.strip()
     
     # Remove unwanted data
     df = df.dropna(axis=1,how='all')
@@ -102,12 +107,12 @@ def open_respostas():
     return df
 
 
-def open_profissional():
+def open_professional():
     # sheets_professional = data['url_profissionais']
     # df = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{sheets_professional}/export?format=csv")
     client = set_credentials()
     df = get_data(sheets_name="Profissionais",page="Página1", client=client)
-    df = preprocess_profissional(df)
+    df = preprocess_professional(df)
     return df
 
 
@@ -116,7 +121,7 @@ def open_matches():
         client = set_credentials()
         df = get_data(sheets_name="db-metAMORfose", page="Matches", client=client)
         if df is None or df.empty:
-            return pd.DataFrame(columns=["phone_professional", "name_paciente", "phone_paciente", "area", "price", "datetime"])
+            return pd.DataFrame(columns=["name_paciente", "name_professional", "area", "price", "datetime"])
         return df
     except Exception as e:
         print(f"Error: {e}")
@@ -125,31 +130,37 @@ def open_matches():
     
     
 def save_matches(df):
-    print(df["price"])
+    df = df.fillna('')
     client = set_credentials()
-    sheet = client.open("matches").sheet1
-    data = [df.columns.tolist()] + df.values.tolist()
-    sheet.update("A1", data)
+    sheet = client.open("db-metAMORfose")
+    sheet = sheet.worksheet("Matches")
+    # data = [df.columns.tolist()] + df.values.tolist()
+    data = df.values.tolist()
+    sheet.append_rows(data, value_input_option="USER_ENTERED")
     print("Data saved successfully!")
 
 
 def open_mock():
-    mock_path = Path(base_path, "csv", "mock.csv")
+    mock_path = Path(base_path, "csv", "mock_match.csv")
     df = pd.read_csv(mock_path, sep=",",encoding="utf-8",index_col=0)
     df.reset_index(inplace=True)
     return df
 
 
-##### DEPRECATED ####
-# def send_data(row, col, value):
-#     payload = {"row": row, "col": col, "value": value}
-#     url = data['url_google_script']
-#     response = requests.post(url, data=payload)
-#     if str(response) == "<Response [200]>":
-#             print("Request Accepted!")
-#     else:
-#             print(response)
-#     return response
+def open_mock_professional():
+    mock_path = Path(base_path, "csv", "mock_professionais.csv")
+    df = pd.read_csv(mock_path, sep=",",encoding="utf-8",index_col=0)
+    df.reset_index(inplace=True)
+    df = preprocess_professional(df)
+    return df
+
+
+def open_mock_respostas():
+    mock_path = Path(base_path, "csv", "mock_respostas.csv")
+    df = pd.read_csv(mock_path, sep=",",encoding="utf-8",index_col=0)
+    df.reset_index(inplace=True)
+    df = preprocess_respostas(df)
+    return df
 
 
 def set_credentials():
@@ -184,11 +195,11 @@ def get_data(sheets_name = "db-metAMORfose", page = None,client=None):
 
 def main():
     df_resposta = open_respostas()
-    df_profissional = open_profissional()
+    df_professional = open_professional()
     # print(df_resposta)
-    # print(df_profissional)
-    send_data(sheets_name="db-metAMORfose",df=df_resposta,page="Respostas")
-    send_data(sheets_name="db-metAMORfose",df=df_profissional,page="Profissionais")
+    # print(df_professional)
+    # send_data(sheets_name="db-metAMORfose",df=df_resposta,page="Respostas")
+    # send_data(sheets_name="db-metAMORfose",df=df_professional,page="Profissionais")
 
 
 if __name__ == "__main__":
