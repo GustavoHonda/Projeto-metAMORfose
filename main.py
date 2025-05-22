@@ -1,11 +1,6 @@
 from src.pipeline import main
-
-from pathlib import Path
-from datetime import datetime
-import sys
+from pynput import keyboard
 
 
 if __name__ == "__main__":
-
     main()
-

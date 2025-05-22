@@ -1,5 +1,6 @@
 import pyautogui as pg
 import webbrowser as web
+import random
 import time
 from src.get_data import open_professional, open_respostas, open_mock
 import subprocess
@@ -7,6 +8,8 @@ from pathlib import Path
 import platform
 from src.utils.path import get_project_root
 import sys
+import pyperclip
+import keyboard
 
 base_path = get_project_root()
 
@@ -84,48 +87,68 @@ def locate_search_bar():
     print(search_bar_x, search_bar_y)
     return search_bar_x, search_bar_y
     
+   
+def human_write(texto):
+    def precisa_clipboard(char):
+        return char in 'áàâãäéèêëíìîïóòôõöúùûüÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜ'
+
+    for char in texto:
+
+        if random.random() < 0.05:  
+            erro = random.choice('abcdefghijklmnopqrstuvwxyz')
+            pg.write(erro)
+            time.sleep(random.uniform(0.05, 0.2))
+            pg.press('backspace')
+
+        if precisa_clipboard(char):
+            pyperclip.copy(char)
+            pg.hotkey('ctrl', 'v')
+            print(char)
+        else:
+            pg.write(char)
+
+        time.sleep(random.uniform(0.035, 0.009))  
+        
     
 def send_msg(phone, message, search_bar_pos):
-    try:
-        time.sleep(1) 
-        pg.click(search_bar_pos[0], search_bar_pos[1])
-        pg.write(phone)
-        pg.press('enter') 
-        
-        time.sleep(2)
-        for line in message:
-            pg.write(line)
-            pg.hotkey('shift', 'enter')
-        
-        time.sleep(2)
-        pg.press("enter") 
+    time.sleep(1) 
+    pg.click(search_bar_pos[0], search_bar_pos[1])
+    pg.write(str(phone))
+    pg.press('enter') 
+    
+    time.sleep(2)
+    for line in message:
+        human_write(line)
+        pg.hotkey('shift', 'enter')
+    
+    time.sleep(2)
+    pg.press("enter") 
         # pg.click(search_bar_pos[0] + 250, search_bar_pos[1])
-    except Exception as e:
-        print("Error:", e)
-        print("Error in send_msg()")
-        exit_webpg()
-        return -1
+    # except Exception as e:
+    #     print("Error:", e)
+    #     print("Error in send_msg()")
+    #     exit_webpg()
+    #     return -1
 
 
 def send_batch(df):
     response = open_page()
-    time.sleep(40)
+    time.sleep(10)
     pos = locate_search_bar()
-    try:
-        df = df[['name','phone_professional','phone_pacient','description','price']]
-        n_total = len(df)
-        for index, row in df.iterrows():
-            text = text_message(row["name"], row["phone_pacient"], row["description"], row["price"])
-            send_msg(row["phone_professional"], text, pos)
-            print(f"{index + 1} de {n_total} mensagens enviadas")
-    except Exception as e:
-        print("Error:", e)
-        print("Error in send_batch")
-        exit_webpg()
-        return -1
+    # try:
+    df = df[['name_paciente','phone_professional','phone_paciente','description','price']]
+    n_total = len(df)
+    for index, row in df.iterrows():
+        text = text_message(row["name_paciente"], row["phone_paciente"], row["description"], row["price"])
+        send_msg(row["phone_professional"], text, pos)
+        print(f"{index + 1} de {n_total} mensagens enviadas")
+    # except Exception as e:
+    #     print("Error:", e)
+    #     print("Error in send_batch")
+    #     exit_webpg()
+    #     return -15511950440023
     print("Sent all messages")
     exit_webpg()
-
 
 def text_message(name, phone, description, price):
     text = (f"Segue conexão com paciente:",
@@ -133,6 +156,7 @@ def text_message(name, phone, description, price):
             f"Contato: {phone}",
             f"Problemas: {description}",
             f"Valor sugerido: {price}R$")
+    
     return text
 
 

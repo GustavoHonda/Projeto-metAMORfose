@@ -38,6 +38,12 @@ pyinstaller --onefile --icon=img/logo.png  main.py
 
 ```
 
+### Abilitar copy paste do Pyperclip
+```bash
+sudo apt update
+sudo apt install xclip
+```
+
 
 teste2
 

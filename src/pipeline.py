@@ -3,6 +3,9 @@ from src.get_data import open_mock_professional, open_mock_respostas
 from src.send_msg import send_batch 
 from src.matching import match
 
+
+
+
 SAFE_TO_EXEC=False
 
 def main():
@@ -11,10 +14,7 @@ def main():
     df_respostas = open_mock_respostas()
     df_matchings = open_matches()
     
-    print(df_professional)
-    
     matched = match(df_professional, df_respostas, df_matchings)
-    exit(0)
     # mock_matched = open_mock()
     if SAFE_TO_EXEC:
         response = send_batch(matched)

@@ -20,6 +20,7 @@ def all_match(df_professional, df_resposta,df_matchings):
         paci.phone_paciente,
         paci.price AS price,
         paci.datetime AS datetime,
+        paci.description AS description,
         prof.name_professional,
         prof.area AS area_professional,
         prof.phone_professional,
@@ -74,39 +75,36 @@ def select_match(df_matchings,df_all_matches):
     return result_df
 
 def match(df_professional, df_resposta, df_matchings):
-    
+        
     df_all_matches = all_match(df_professional, df_resposta,df_matchings)
     resultado = select_match(df_matchings,df_all_matches)
     
-    save_matches(resultado[["name_paciente", "name_professional", "area", "datetime", "price"]])
     df_all_matches.to_csv('./csv/all_matching.csv', index=False)
     resultado.to_csv("./csv/selected_matchings.csv",index=False)
     
-    return resultado
+    
+    
+    save_matches(resultado[["name_paciente", "name_professional", "area", "datetime", "price"]])
+    
+    return resultado[['name_paciente','phone_professional','phone_paciente','description','price']]
 
 
 def main():
     df_professional = open_professional()[["name_professional","area", "phone_professional", "price", "freq_professional"]]
-    df_resposta = open_respostas()[["name_paciente", "area", "datetime", "phone_paciente", "price","freq_client"]]
+    df_resposta = open_respostas()[["name_paciente", "area", "datetime", "phone_paciente", "description", "price","freq_client"]]
     df_matchings = open_matches()[["name_paciente", "name_professional", "area", "datetime", "price"]]
 
     resultado = match(df_professional,df_resposta,df_matchings)
     
 
 def mock():
-    df_professional = open_mock_professional()
-    df_paciente = open_mock_respostas()
-    df_matches = open_matches()
+    df_professional = open_mock_professional()[["name_professional","area", "phone_professional", "price", "freq_professional"]]
+    df_paciente = open_mock_respostas()[["name_paciente", "area", "datetime", "phone_paciente", "price","freq_client"]]
+    df_matches = open_matches()[["name_paciente", "name_professional", "area", "datetime", "price"]]
     
     resultado = match(df_professional, df_paciente, df_matches)
     
 
 if __name__ == "__main__":
-    main()
-    # mock()
-
-
-# Elen Terapia Holística (Terapia holistica)
-# Guilherme (Clinico Geral)
-# Lorena (Clinico Geral)
-# Priscila (Terapia holistica)
+    # main()
+    mock()
