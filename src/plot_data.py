@@ -3,7 +3,7 @@ import pandas as pd
 from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
-from get_data import open_profissional, open_respostas
+from get_data import open_professional, open_respostas
 import warnings
 
 # Erros/implementações que tem pra fazer/corrigir nesse módulo:
@@ -85,7 +85,7 @@ def area_plot(df, column):
 def main():
 
     df_resposta = open_respostas()
-    df_profissional = open_profissional()
+    df_professional = open_professional()
 
     # Print resposta charts
     area_plot(df=df_resposta, column='area')
@@ -93,7 +93,7 @@ def main():
     weekday_plot(df=df_resposta, column='datetime')
 
     # Print Professional charts
-    area_plot(df=df_profissional,column='area')
+    area_plot(df=df_professional,column='area')
 
 
 if __name__ == '__main__':

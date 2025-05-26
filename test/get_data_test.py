@@ -21,6 +21,7 @@ def test_extrair_precos_com_ponto_milhar():
 def test_preprocess_respostas_minimal(monkeypatch):
     # Simula um dataframe de entrada
     df = pd.DataFrame([{
+        'id': '1',
         'time': '22/12/2024 21:10:00',
         'name_paciente': 'João',
         'e-mail': 'joao@email.com',
@@ -33,7 +34,7 @@ def test_preprocess_respostas_minimal(monkeypatch):
         'urgencie': 'média',
         'free_service': 'não',
         'sexual_identity': 'masculino',
-        'profissional': 'nenhum',
+        'professional': 'nenhum',
         'whatsapp': 'sim'
     }])
 

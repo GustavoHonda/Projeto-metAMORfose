@@ -1,6 +1,6 @@
 from src.pipeline import main
-    
-if __name__=="__main__":
-    """Entry point for the script.
-    """
+from pynput import keyboard
+
+
+if __name__ == "__main__":
     main()
