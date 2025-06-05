@@ -27,15 +27,10 @@ pytest ./test
 ```bash
 cd /caminho/para/Projeto-metAMORfose/
 pyinstaller --onefile main.py 
-
 # ou também sem linha de comando
-
 pyinstaller --onefile --noconsole main.py 
-
 # com logo fica
-
 pyinstaller --onefile --icon=img/logo.png  main.py 
-
 ```
 
 ### Abilitar copy paste do Pyperclip
@@ -44,45 +39,16 @@ sudo apt update
 sudo apt install xclip
 ```
 
+### Execução pela linha de comando no Windows com ambiente já instalado
+1. cd C:\Users\DLG\Documents\v1.0\Projeto-metAMORfose-main
+2. venv\Scripts\activate
+3. python main.py
 
-teste2
-
-# adicionar no pacote 
-
-git add README.md
-
-# salvar na maquina a versao do pacote
-
- git commit -m "Edited README.md"
-
-# 
-
- git status 
-
-# download 
-
- git clone
-
- # caminho do arquivo
-
-
- git add README.md
-
- # O pacote deve estar salvo para enviar 
- git commit -m "Atualiza README.md"
-
- # enviar pacote na internet no grupo
-
- git push 
-
- # 
-
- git pull 
-
-python src/exercicio2.py
-
-# python src/exercicio2.py
-
-# python -m src.matching
-
-# pytest : Verifica todos os testes que estao passando
+### Antes de rodar o programa certifique-se de que:
+1. Tenha conexão com a internet.
+2. A sua conta do whatsapp web esteja conectada.
+3. Não Mexer o mouse durante a execução do código.
+4. Ter certeza que os contatos dos profissionais estão adicionados no whatsapp logado no Whatsapp web.
+5. Mantenha a janela do navegador com whatsapp vizível.
+6. Ter certeza que o caps lock não está ativo.
+7. Tomar cuidado com utilização de mais de um monitor.

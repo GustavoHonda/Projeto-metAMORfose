@@ -2,22 +2,22 @@ import pyautogui as pg
 import webbrowser as web
 import random
 import time
-from src.get_data import open_professional, open_respostas, open_mock
+from src.get_data import open_mock
 import subprocess
 from pathlib import Path
 import platform
 from src.utils.path import get_project_root
 import sys
 import pyperclip
-import keyboard
+
 
 base_path = get_project_root()
 
 # Erros/implementações que tem pra fazer/corrigir nesse módulo:
 # 1. (FEITO) Ao buscar a imagem search_bar na tela do usuário o tamanho da imagem é levado em consideração
-# 2. check_load() acessa web.whatsapp.com e retorna apenas a tela de loading da aplicação e não sabemos se a tela carregou ou não 
-# 3. Utilizar o editacódigo para fazer o envio de mensagens
-# 4. Tomar cuidade para a conta não ser bloqueada por utilização de chatbot (colocar timers e mimetizar o comportamento de um usuário real) 
+# 2. (ANALIZAR)check_load() acessa web.whatsapp.com e retorna apenas a tela de loading da aplicação e não sabemos se a tela carregou ou não 
+# 3. Acrescenta Selenium para fazer o envio de mensagens
+# 4. (FEITO) Tomar cuidade para a conta não ser bloqueada por utilização de chatbot (colocar timers e mimetizar o comportamento de um usuário real) 
 # 5. Melhorar a função de enviar mensagens para que ela não dependa de uma imagem
 
 
@@ -44,18 +44,17 @@ def exit_webpg():
         print("Exit error")
         return -1
     sys.exit(0)
-
-
-def direct_msg(phone, message):
-    web.open("https://web.whatsapp.com/send?phone="+phone+"&text="+message)
-    time.sleep(5)
-    pg.press("enter")
     
     
 def open_page():
     enable_localhost_execution()
     google = "/usr/bin/google-chrome" if platform.system() == "Linux" else "C:/Program Files/Google/Chrome/Application/chrome.exe"
     response = web.get(google).open("https://web.whatsapp.com")
+    if not response:
+        firefox = r"C:\Program Files (x86)\Mozilla Firefox\firefox"
+        response = web.get(firefox).open("https://web.whatsapp.com")
+    if not response:
+        response = web.open("https://web.whatsapp.com")
     if not response:
         raise ConnectionError
     else:
@@ -65,6 +64,8 @@ def open_page():
 
 def locate_img(path):
     try:
+        screenshot = pg.screenshot()
+        screenshot.save("print_debug.png")
         search_bar = pg.locateOnScreen(path, confidence=0.8) 
         return search_bar
     except Exception as e:
@@ -90,10 +91,8 @@ def locate_search_bar():
    
 def human_write(texto):
     def precisa_clipboard(char):
-        return char in 'áàâãäéèêëíìîïóòôõöúùûüÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜ'
-
+        return char in 'áàâãäéèêëíìîïóòôõöúùûüÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜ👤📞💰📋'
     for char in texto:
-
         if random.random() < 0.05:  
             erro = random.choice('abcdefghijklmnopqrstuvwxyz')
             pg.write(erro)
@@ -103,60 +102,52 @@ def human_write(texto):
         if precisa_clipboard(char):
             pyperclip.copy(char)
             pg.hotkey('ctrl', 'v')
-            print(char)
         else:
             pg.write(char)
-
         time.sleep(random.uniform(0.035, 0.009))  
         
     
 def send_msg(phone, message, search_bar_pos):
-    time.sleep(1) 
+    time.sleep(2) 
     pg.click(search_bar_pos[0], search_bar_pos[1])
     pg.write(str(phone))
+    time.sleep(3) 
     pg.press('enter') 
     
-    time.sleep(2)
+    time.sleep(5)
     for line in message:
         human_write(line)
         pg.hotkey('shift', 'enter')
     
-    time.sleep(2)
+    time.sleep(5)
     pg.press("enter") 
-        # pg.click(search_bar_pos[0] + 250, search_bar_pos[1])
-    # except Exception as e:
-    #     print("Error:", e)
-    #     print("Error in send_msg()")
-    #     exit_webpg()
-    #     return -1
 
 
 def send_batch(df):
     response = open_page()
     time.sleep(10)
     pos = locate_search_bar()
-    # try:
-    df = df[['name_paciente','phone_professional','phone_paciente','description','price']]
-    n_total = len(df)
     for index, row in df.iterrows():
-        text = text_message(row["name_paciente"], row["phone_paciente"], row["description"], row["price"])
+        text = text_message(row)
         send_msg(row["phone_professional"], text, pos)
-        print(f"{index + 1} de {n_total} mensagens enviadas")
-    # except Exception as e:
-    #     print("Error:", e)
-    #     print("Error in send_batch")
-    #     exit_webpg()
-    #     return -15511950440023
+        print(f"{index + 1} de {len(df)} mensagens enviadas")
     print("Sent all messages")
     exit_webpg()
 
-def text_message(name, phone, description, price):
-    text = (f"Segue conexão com paciente:",
-            f"Nome: {name}",
-            f"Contato: {phone}",
-            f"Problemas: {description}",
-            f"Valor sugerido: {price}R$")
-    
+def text_message(row):
+    name_paciente, name_professional, area,phone,description,price = row["name_paciente"], row["name_professional"],row["area"], row["phone_paciente"], row["description"], row["price"]
+
+    text = (
+            f"Olá {name_professional}, tudo bem?",
+            f"Você foi conectado com um paciente da área de {area}:",
+            f"",
+            f"👤Nome: {name_paciente}",
+            f"📞Contato: {phone}",
+            f"📋Descrição: {description}",
+            f"💰Valor proposto: R${price}",
+            f"",
+            f"Entre em contato caso deseje continuar com o atendimento.",
+            f"Obrigado!")
     return text
 
 

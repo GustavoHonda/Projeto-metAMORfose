@@ -3,24 +3,26 @@ from src.get_data import open_mock_professional, open_mock_respostas
 from src.send_msg import send_batch 
 from src.matching import match
 
-
-
-
 SAFE_TO_EXEC=False
+EXECUTION_MODE = "mock"
 
 def main():
-
-    df_professional = open_mock_professional()
-    df_respostas = open_mock_respostas()
-    df_matchings = open_matches()
     
-    matched = match(df_professional, df_respostas, df_matchings)
-    # mock_matched = open_mock()
-    if SAFE_TO_EXEC:
-        response = send_batch(matched)
-        return 0
+    if EXECUTION_MODE := "production":
+        df_professional = open_professional()
+        df_respostas = open_respostas()
+        df_matchings = open_matches()
+        matched = match(df_professional, df_respostas, df_matchings)
+        print(matched)
+    elif EXECUTION_MODE == "mock":
+        df_professional = open_mock_professional()
+        df_respostas = open_mock_respostas()
+        df_matchings = open_matches()
+        matched = match(df_professional, df_respostas, df_matchings)
     else:
-        response = send_batch(matched)
-        print(response)
-        return 0
-    
+        return
+        
+    if SAFE_TO_EXEC:
+        print("Safe to execute, sending batch...")
+        # response = send_batch(matched)
+    return 0
