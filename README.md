@@ -40,9 +40,11 @@ sudo apt install xclip
 ```
 
 ### Execução pela linha de comando no Windows com ambiente já instalado
-1. cd C:\Users\DLG\Documents\v1.0\Projeto-metAMORfose-main
-2. venv\Scripts\activate
-3. python main.py
+```bash
+cd C:\Users\DLG\Documents\v1.0\Projeto-metAMORfose-main
+venv\Scripts\activate
+python main.py
+```
 
 ### Antes de rodar o programa certifique-se de que:
 1. Tenha conexão com a internet.
