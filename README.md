@@ -2,9 +2,7 @@
 
 ### Para criar o ambiente de desenvolvimento
 ```bash
-
-cd /caminho/para/Projeto-metAMORfose/ 
-
+cd /caminho/para/Projeto-metAMORfose/
 pytho -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -21,16 +19,16 @@ pytho -m src.qualer_um_dos_modulos_dentro_de_src
 ```bash
 cd /caminho/para/Projeto-metAMORfose/
 pytest ./test
-``` 
+```
 
 ### Criação de um executável
 ```bash
 cd /caminho/para/Projeto-metAMORfose/
-pyinstaller --onefile main.py 
+pyinstaller --onefile main.py
 # ou também sem linha de comando
-pyinstaller --onefile --noconsole main.py 
+pyinstaller --onefile --noconsole main.py
 # com logo fica
-pyinstaller --onefile --icon=img/logo.png  main.py 
+pyinstaller --onefile --icon=img/logo.png  main.py
 ```
 
 ### Abilitar copy paste do Pyperclip

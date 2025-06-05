@@ -51,10 +51,10 @@ def open_page():
     google = "/usr/bin/google-chrome" if platform.system() == "Linux" else "C:/Program Files/Google/Chrome/Application/chrome.exe"
     response = web.get(google).open("https://web.whatsapp.com")
     if not response:
-        firefox = r"C:\Program Files (x86)\Mozilla Firefox\firefox"
-        response = web.get(firefox).open("https://web.whatsapp.com")
-    if not response:
         response = web.open("https://web.whatsapp.com")
+    if not response:
+        response = web.get(firefox).open("https://web.whatsapp.com")
+        firefox = r"C:\Program Files (x86)\Mozilla Firefox\firefox"
     if not response:
         raise ConnectionError
     else:
@@ -91,7 +91,7 @@ def locate_search_bar():
    
 def human_write(texto):
     def precisa_clipboard(char):
-        return char in 'áàâãäéèêëíìîïóòôõöúùûüÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜ👤📞💰📋'
+        return char in 'áàâãäéèêëíìîïóòôõöúùûüÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜç👤📞💰📋'
     for char in texto:
         if random.random() < 0.05:  
             erro = random.choice('abcdefghijklmnopqrstuvwxyz')
@@ -125,8 +125,9 @@ def send_msg(phone, message, search_bar_pos):
 
 def send_batch(df):
     response = open_page()
-    time.sleep(10)
+    time.sleep(60)
     pos = locate_search_bar()
+    # pos = (500,500)
     for index, row in df.iterrows():
         text = text_message(row)
         send_msg(row["phone_professional"], text, pos)

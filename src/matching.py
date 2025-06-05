@@ -35,7 +35,6 @@ def all_match(df_professional, df_resposta,df_matchings):
     # AND prev.phone_professional IS NULL
     
     
-    
     all_matches = sqldf(query, locals())
     return all_matches
 
@@ -102,7 +101,6 @@ def add_missing_matches(df_professional, df_selected_matches, df_all_matches):
     missing_phones = prof_phones - selected_phones
 
     if missing_phones:
-        exit(0)
         print(f"Warning!!! Profissionais que não foram selecionados: {len(missing_phones)}")
     else:
         print("Todos os profissionais foram selecionados.")
@@ -130,11 +128,9 @@ def add_missing_matches(df_professional, df_selected_matches, df_all_matches):
 
 
 def match(df_professional, df_resposta, df_matchings):
-        
     df_all_matches = all_match(df_professional, df_resposta,df_matchings)
     df_selected_matches = select_match(df_matchings,df_all_matches)
     df_selected_matches = add_missing_matches(df_professional, df_selected_matches, df_all_matches)
-    
     if not df_selected_matches.empty:
         save_matches(df_selected_matches,df_all_matches)
     
@@ -158,5 +154,5 @@ def mock():
     print(resultado)
 
 if __name__ == "__main__":
-    main()
-    # mock()
+    # main()
+    mock()
