@@ -3,7 +3,7 @@ import pandas as pd
 from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
-from get_data import open_professional, open_respostas
+from src.get_data import open_professional, open_respostas
 import warnings
 
 # Erros/implementações que tem pra fazer/corrigir nesse módulo:

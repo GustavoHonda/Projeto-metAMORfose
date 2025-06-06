@@ -71,9 +71,13 @@ def preprocess_respostas(df):
     
     # df["datetime"] = df["datetime"].dt.strftime(f'%Y-%m-%d %H:%M:%S')
     
+    
     # Price Column
     df['price'] = df['price'].apply(extrair_precos)
-    df["price"] = df["price"].apply(lambda x: x[0] if isinstance(x, list) and len(x) > 0 else 0)
+    df["price_max"] = df["price"].apply(lambda x: x[0] if isinstance(x, list) and len(x) > 0 else 300)
+    df["price_min"] = df["price"].apply(lambda x: x[1] if isinstance(x, list) and len(x) > 1 else 35)
+    df.drop(columns=['price'], inplace=True)
+
     
     return df
 
@@ -145,7 +149,7 @@ def save_matches(df_matches, df_all_matches):
     df_all_matches.to_csv(Path(base_dir, f'./csv/matching_all.csv'), index=False)
     df_matches.to_csv(Path(base_dir, f"./csv/matchings_selected.csv"),index=False)
     
-    df = df_matches[["name_paciente", "name_professional", "phone_paciente", "phone_professional", "area", "datetime", "price"]]
+    df = df_matches[["name_paciente", "name_professional", "phone_paciente", "phone_professional", "area", "datetime", "price_min", "price_max"]]
     pd.set_option('future.no_silent_downcasting', True)
     df = df.fillna('').infer_objects(copy=False)
     client = set_credentials()
@@ -215,6 +219,7 @@ def main():
     df_professional = open_professional()
     df_resposta.to_csv("./csv/respostas.csv")
     df_professional.to_csv("./csv/professional.csv")
+    data_info(df_resposta, "price")
     # print(df_professional)
     # send_data(sheets_name="db-metAMORfose",df=df_resposta,page="Respostas")
     # send_data(sheets_name="db-metAMORfose",df=df_professional,page="Profissionais")

@@ -74,7 +74,7 @@ def locate_img(path):
 
 
 def locate_search_bar():
-    path_img = Path(base_path, "img")
+    path_img = Path(base_path, "img","search_bar")
     for path in path_img.iterdir():
         path = str(path)
         search_bar = locate_img(path)
@@ -85,6 +85,22 @@ def locate_search_bar():
         exit_webpg()
         return -1
     search_bar_x, search_bar_y = pg.center(search_bar) 
+    print(search_bar_x, search_bar_y)
+    return search_bar_x, search_bar_y
+
+
+def locate_new_chat():
+    path_img = Path(base_path, "img", "new_chat")
+    for path in path_img.iterdir():
+        path = str(path)
+        new_chat = locate_img(path)
+        if new_chat is not None:
+            break
+    if new_chat is None:
+        print("Error: new chat not found")
+        exit_webpg()
+        return -1
+    search_bar_x, search_bar_y = pg.center(new_chat) 
     print(search_bar_x, search_bar_y)
     return search_bar_x, search_bar_y
     
@@ -98,7 +114,6 @@ def human_write(texto):
             pg.write(erro)
             time.sleep(random.uniform(0.05, 0.2))
             pg.press('backspace')
-
         if precisa_clipboard(char):
             pyperclip.copy(char)
             pg.hotkey('ctrl', 'v')
@@ -107,48 +122,49 @@ def human_write(texto):
         time.sleep(random.uniform(0.035, 0.009))  
         
     
-def send_msg(phone, message, search_bar_pos):
-    time.sleep(2) 
-    pg.click(search_bar_pos[0], search_bar_pos[1])
+def send_msg(phone, message, search_bar_pos,new_chat_pos):
+    time.sleep(5) 
+    pg.click(new_chat_pos[0], new_chat_pos[1])
+    # time.sleep(2) 
+    # pg.click(search_bar_pos[0], search_bar_pos[1])
     pg.write(str(phone))
-    time.sleep(3) 
-    pg.press('enter') 
-    
     time.sleep(5)
+    pg.press('enter')
+    time.sleep(7)
     for line in message:
         human_write(line)
         pg.hotkey('shift', 'enter')
-    
     time.sleep(5)
-    pg.press("enter") 
+    pg.press("enter")
 
 
 def send_batch(df):
-    response = open_page()
+    response = open_page(),
     time.sleep(60)
-    pos = locate_search_bar()
-    # pos = (500,500)
+    pos_search_bar = locate_search_bar()
+    pos_new_chat = locate_new_chat()
+    print(df.columns)
     for index, row in df.iterrows():
         text = text_message(row)
-        send_msg(row["phone_professional"], text, pos)
+        send_msg(row["phone_professional"], text, pos_search_bar, pos_new_chat)
         print(f"{index + 1} de {len(df)} mensagens enviadas")
     print("Sent all messages")
     exit_webpg()
 
-def text_message(row):
-    name_paciente, name_professional, area,phone,description,price = row["name_paciente"], row["name_professional"],row["area"], row["phone_paciente"], row["description"], row["price"]
 
+def text_message(row):
+    name_paciente, name_professional, area,phone,description,price_min,price_max = row["name_paciente"], row["name_professional"],row["area"], row["phone_paciente"], row["description"], row["price_min"],row["price_max"]
+    print(name_paciente,area,name_professional,phone,description,price_min,price_max)
     text = (
-            f"Olá {name_professional}, tudo bem?",
+            f"Olá {name_professional}, tudo bem? Sou a MetAMORfose!",
             f"Você foi conectado com um paciente da área de {area}:",
             f"",
             f"👤Nome: {name_paciente}",
-            f"📞Contato: {phone}",
+            f"📞Contato: wa.me/{phone}",
             f"📋Descrição: {description}",
-            f"💰Valor proposto: R${price}",
+            f"💰Valor proposto pelo paciente: R${price_min} à R${price_max}",
             f"",
-            f"Entre em contato caso deseje continuar com o atendimento.",
-            f"Obrigado!")
+            f"Obrigada! Até a próxima!",)
     return text
 
 

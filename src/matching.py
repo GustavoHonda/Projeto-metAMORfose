@@ -17,7 +17,8 @@ def all_match(df_professional, df_resposta,df_matchings):
         paci.name_paciente,
         paci.area AS area,
         paci.phone_paciente,
-        paci.price AS price,
+        paci.price_max AS price_max,
+        paci.price_min AS price_min,
         paci.datetime AS datetime,
         paci.description AS description,
         prof.name_professional,
@@ -34,7 +35,6 @@ def all_match(df_professional, df_resposta,df_matchings):
     # WHERE prev.phone_paciente IS NULL
     # AND prev.phone_professional IS NULL
     
-    
     all_matches = sqldf(query, locals())
     return all_matches
 
@@ -48,7 +48,8 @@ def select_match(df_matchings,df_all_matches):
         all_matches.phone_professional,
         all_matches.description,
         all_matches.area,
-        all_matches.price
+        all_matches.price_max,
+        all_matches.price_min
     FROM df_all_matches all_matches
     LEFT JOIN df_matchings prev
         ON all_matches.phone_paciente = prev.phone_paciente
@@ -123,7 +124,7 @@ def add_missing_matches(df_professional, df_selected_matches, df_all_matches):
         print(f"{len(df_extra_matches)} novos matches adicionados.")
     else:
         print("Nenhum novo match foi adicionado.")
-        
+    
     return df_selected_matches
 
 
@@ -133,7 +134,6 @@ def match(df_professional, df_resposta, df_matchings):
     df_selected_matches = add_missing_matches(df_professional, df_selected_matches, df_all_matches)
     if not df_selected_matches.empty:
         save_matches(df_selected_matches,df_all_matches)
-    
     return df_selected_matches
 
 
@@ -141,7 +141,7 @@ def main():
     df_professional = open_professional()
     df_resposta = open_respostas()
     df_matchings = open_matches()
-
+    
     resultado = match(df_professional,df_resposta,df_matchings)
 
 
@@ -151,7 +151,6 @@ def mock():
     df_matches = open_matches()
 
     resultado = match(df_professional, df_paciente, df_matches)
-    print(resultado)
 
 if __name__ == "__main__":
     # main()
