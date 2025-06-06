@@ -21,14 +21,15 @@ cd /caminho/para/Projeto-metAMORfose/
 pytest ./test
 ```
 
-### Criação de um executável
+### Criação de um executável e atalho na área de trabalho
 ```bash
-cd /caminho/para/Projeto-metAMORfose/
-pyinstaller --onefile main.py
-# ou também sem linha de comando
-pyinstaller --onefile --noconsole main.py
-# com logo fica
-pyinstaller --onefile --icon=img/logo.png  main.py
+# Para Windows:
+install.bat
+
+# Para Ubuntu:
+./install.sh
+
+# Os executáveis ficam na pasta ./dist
 ```
 
 ### Abilitar copy paste do Pyperclip
@@ -36,6 +37,7 @@ pyinstaller --onefile --icon=img/logo.png  main.py
 sudo apt update
 sudo apt install xclip
 ```
+
 
 ### Execução pela linha de comando no Windows com ambiente já instalado
 ```bash

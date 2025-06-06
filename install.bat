@@ -10,9 +10,9 @@ set "PROJECT_DIR=%cd%"
 
 REM Verifica se o venv já existe
 if exist "venv\Scripts\activate.bat" (
-    echo ✅ venv já existe (Windows)
+    echo ? venv já existe (Windows)
 ) else (
-    echo ❌ venv não encontrado (Windows). Criando...
+    echo ? venv não encontrado (Windows). Criando...
     py -3.12 -m venv venv
 )
 
@@ -32,12 +32,14 @@ call venv\Scripts\activate.bat
 pip install -r requirements.txt
 
 REM Rodar pyinstaller
-pyinstaller --onefile --icon=img/logo.png main.py
+setlocal enabledelayedexpansion
+set "PYTHONPATH=!PYTHONPATH!;%cd%\src"
+pyinstaller --onefile --icon=img/logo.png --paths=src --log-level=INFO main.py
 
 REM Criar atalho na área de trabalho usando VBS
-echo 🔧 Criando atalho no Windows...
+echo ?? Criando atalho no Windows...
 
-set "SHORTCUT=%USERPROFILE%\Desktop\MeuProjeto.lnk"
+set "SHORTCUT=%USERPROFILE%\Desktop\MetAMORfose.lnk"
 set "TARGET=%PROJECT_DIR%\dist\main.exe"
 set "WORKDIR=%PROJECT_DIR%"
 
@@ -52,7 +54,7 @@ cscript //nologo create_shortcut.vbs
 
 del create_shortcut.vbs
 
-echo ✅ Instalação concluída! Atalho criado na área de trabalho.
+echo ? Instalação concluída! Atalho criado na área de trabalho.
 echo Qualquer dúvida entrar em contato com: gustavo.honda10@gmail.com
 
 endlocal

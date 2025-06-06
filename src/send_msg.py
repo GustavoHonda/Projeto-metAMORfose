@@ -48,10 +48,10 @@ def exit_webpg():
     
 def open_page():
     enable_localhost_execution()
-    google = "/usr/bin/google-chrome" if platform.system() == "Linux" else "C:/Program Files/Google/Chrome/Application/chrome.exe"
-    response = web.get(google).open("https://web.whatsapp.com")
+    response = web.open("https://web.whatsapp.com")
     if not response:
-        response = web.open("https://web.whatsapp.com")
+        google = "/usr/bin/google-chrome" if platform.system() == "Linux" else "C:/Program Files/Google/Chrome/Application/chrome.exe"
+        response = web.get(google).open("https://web.whatsapp.com")
     if not response:
         response = web.get(firefox).open("https://web.whatsapp.com")
         firefox = r"C:\Program Files (x86)\Mozilla Firefox\firefox"

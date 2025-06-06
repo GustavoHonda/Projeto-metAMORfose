@@ -4,7 +4,7 @@ from src.send_msg import send_batch
 from src.matching import match
 
 SAFE_TO_EXEC=True
-EXECUTION_MODE="mock"
+EXECUTION_MODE="production"
 
 def main():
     if EXECUTION_MODE == "production":

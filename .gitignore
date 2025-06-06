@@ -1,4 +1,4 @@
-key/
+key/*
 csv/
 __pycache__/
 .pytest_cache__/
