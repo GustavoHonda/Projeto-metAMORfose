@@ -1,4 +1,8 @@
 key/*
+csv/mock*
+csv/matching*
+csv/professional.csv
+csv/respostas.csv
 __pycache__/
 .pytest_cache__/
 main.spec
