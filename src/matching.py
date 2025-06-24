@@ -38,7 +38,7 @@ def all_match(df_professional, df_resposta,df_matchings):
     all_matches = sqldf(query, locals())
     return all_matches
 
-def select_match(df_matchings,df_all_matches):
+def select_match(df_matchings,df_all_matches)-> pd.DataFrame:
     query = """
     SELECT 
         all_matches.datetime,

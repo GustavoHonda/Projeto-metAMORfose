@@ -1,10 +1,11 @@
+from os import write
 from src.get_data import open_professional, open_respostas, open_mock, open_matches
 from src.get_data import open_mock_professional, open_mock_respostas, data_info
-from src.send_msg import send_batch 
+from src.send_msg import send_batch, write_message
 from src.matching import match
 
 SAFE_TO_EXEC=False
-EXECUTION_MODE="mock"
+EXECUTION_MODE="manual"
 
 def main()-> int:
     if EXECUTION_MODE == "production":
@@ -23,6 +24,17 @@ def main()-> int:
         df_respostas = open_mock_respostas()
         df_matchings = open_matches()
         matched = match(df_professional, df_respostas, df_matchings)
+    elif EXECUTION_MODE == "manual":
+        print("Running in manual mode...")
+        df_professional = open_professional()
+        print("professionals opened...")
+        df_respostas = open_respostas()
+        print("respostas opened...")
+        df_matchings = open_matches()
+        print("respostas matchigs...")
+        matched = match(df_professional, df_respostas, df_matchings)
+        write_message(matched)
+        return 0
     else:
         return
     

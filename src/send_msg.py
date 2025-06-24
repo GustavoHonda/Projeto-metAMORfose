@@ -21,7 +21,7 @@ base_path = get_project_root()
 # 5. Melhorar a função de enviar mensagens para que ela não dependa de uma imagem
 
 
-def enable_localhost_execution():
+def enable_localhost_execution()-> int:
     os_name = platform.system()
     if os_name == "Linux":
         subprocess.run("xhost + local:", shell=True, executable="/bin/bash")
@@ -34,7 +34,7 @@ def enable_localhost_execution():
         return -1
 
 
-def exit_webpg():
+def exit_webpg()-> int:
     try:
         time.sleep(2)
         pg.keyDown('ctrl')
@@ -80,7 +80,7 @@ def locate_img(path)-> tuple:
         return None
 
 
-def locate_search_bar():
+def locate_search_bar()-> tuple:
     path_img = Path(base_path, "img","search_bar")
     for path in path_img.iterdir():
         path = str(path)
@@ -96,7 +96,7 @@ def locate_search_bar():
     return search_bar_x, search_bar_y
 
 
-def locate_new_chat():
+def locate_new_chat()-> tuple:
     path_img = Path(base_path, "img", "new_chat")
     for path in path_img.iterdir():
         path = str(path)
@@ -112,8 +112,8 @@ def locate_new_chat():
     return search_bar_x, search_bar_y
     
    
-def human_write(texto):
-    def precisa_clipboard(char):
+def human_write(texto)-> None:
+    def precisa_clipboard(char)-> bool:
         return char in 'áàâãäéèêëíìîïóòôõöúùûüÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜç👤📞💰📋'
     for char in texto:
         if random.random() < 0.05:  
@@ -129,7 +129,7 @@ def human_write(texto):
         time.sleep(random.uniform(0.035, 0.009))  
         
     
-def send_msg(phone, message, search_bar_pos,new_chat_pos):
+def send_msg(phone, message, search_bar_pos,new_chat_pos)-> None:
     time.sleep(5) 
     pg.click(new_chat_pos[0], new_chat_pos[1])
     # time.sleep(2) 
@@ -145,7 +145,7 @@ def send_msg(phone, message, search_bar_pos,new_chat_pos):
     pg.press("enter")
 
 
-def send_batch(df):
+def send_batch(df)-> None:
     response = open_page(),
     time.sleep(60)
     pos_search_bar = locate_search_bar()
@@ -159,7 +159,18 @@ def send_batch(df):
     exit_webpg()
 
 
-def text_message(row):
+def write_message(df)-> None:
+    print("Printing messages to file...")
+    with open("messages.txt", "w") as f:
+        for index, row in df.iterrows():
+            text = text_message(row)
+            f.write(f"Mensagem {index + 1}:\n")
+            f.write(f"{row["phone_professional"]}:\n")
+            f.write("\n".join(text) + "\n\n")
+        f.close()    
+
+
+def text_message(row)-> tuple:
     name_paciente, name_professional, area,phone,description,price_min,price_max = row["name_paciente"], row["name_professional"],row["area"], row["phone_paciente"], row["description"], row["price_min"],row["price_max"]
     print(name_paciente,area,name_professional,phone,description,price_min,price_max)
     text = (
