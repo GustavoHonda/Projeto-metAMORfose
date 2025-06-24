@@ -4,6 +4,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from src.utils.path import get_project_root
 from pathlib import Path
+from typing import Any
 
 base_path = get_project_root()
 
@@ -44,7 +45,7 @@ def extrair_precos(texto):
 
     
 
-def preprocess_respostas(df):
+def preprocess_respostas(df)->pd.DataFrame:
     
     # Rename columns
     name_columns= ['time','name_paciente','e-mail','phone_paciente','area','description','free_service','price']
@@ -113,7 +114,7 @@ def preprocess_professional(df) -> pd.DataFrame:
     return df
 
 
-def open_respostas():
+def open_respostas()-> pd.DataFrame:
     # sheets_respostas = data['url_respostas']
     # df = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{sheets_respostas}/export?format=csv")
     client = set_credentials()
@@ -122,7 +123,7 @@ def open_respostas():
     return df
 
 
-def open_professional():
+def open_professional()-> pd.DataFrame:
     # sheets_professional = data['url_profissionais']
     # df = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{sheets_professional}/export?format=csv")
     client = set_credentials()
@@ -131,7 +132,7 @@ def open_professional():
     return df
 
 
-def open_matches():
+def open_matches()-> pd.DataFrame:
     try:
         client = set_credentials()
         df = get_data(sheets_name="db-metAMORfose", page="Matches", client=client)
@@ -144,7 +145,7 @@ def open_matches():
         return pd.DataFrame()
     
     
-def save_matches(df_matches, df_all_matches):
+def save_matches(df_matches, df_all_matches)->None:
     base_dir = get_project_root()
     df_all_matches.to_csv(Path(base_dir, f'./csv/matching_all.csv'), index=False)
     df_matches.to_csv(Path(base_dir, f"./csv/matchings_selected.csv"),index=False)
@@ -161,14 +162,14 @@ def save_matches(df_matches, df_all_matches):
     print("Data saved successfully!")
 
 
-def open_mock():
+def open_mock()->pd.DataFrame:
     mock_path = Path(base_path, "csv", "mock_match.csv")
     df = pd.read_csv(mock_path, sep=",",encoding="utf-8",index_col=0)
     df.reset_index(inplace=True)
     return df
 
 
-def open_mock_professional():
+def open_mock_professional()->pd.DataFrame:
     mock_path = Path(base_path, "csv", "mock_professionais.csv")
     df = pd.read_csv(mock_path, sep=",",encoding="utf-8",index_col=0)
     df.reset_index(inplace=True)
@@ -176,7 +177,7 @@ def open_mock_professional():
     return df
 
 
-def open_mock_respostas():
+def open_mock_respostas()->pd.DataFrame:
     mock_path = Path(base_path, "csv", "mock_respostas.csv")
     df = pd.read_csv(mock_path, sep=",",encoding="utf-8",index_col=0)
     df.reset_index(inplace=True)
@@ -184,7 +185,7 @@ def open_mock_respostas():
     return df
 
 
-def set_credentials():
+def set_credentials() -> gspread.Client:
     scope = [
         "https://spreadsheets.google.com/feeds",
         "https://www.googleapis.com/auth/spreadsheets",
@@ -198,7 +199,7 @@ def set_credentials():
     return client
 
 
-def send_data(sheets_name="db-metAMORfose", page = None,df=None):
+def send_data(sheets_name="db-metAMORfose", page = None,df=None)-> None:
     client = set_credentials()
     sheet = client.open(sheets_name)
     sheet = sheet.worksheet(page)
@@ -206,7 +207,7 @@ def send_data(sheets_name="db-metAMORfose", page = None,df=None):
     sheet.update("A1", data)  
     
     
-def get_data(sheets_name = "db-metAMORfose", page = None,client=None):
+def get_data(sheets_name = "db-metAMORfose", page = None,client=None)-> pd.DataFrame:
     sheet = client.open(sheets_name)
     sheet = sheet.worksheet(page)
     data = sheet.get_all_records()
@@ -214,7 +215,7 @@ def get_data(sheets_name = "db-metAMORfose", page = None,client=None):
     return df
 
 
-def main():
+def main()-> None:
     df_resposta = open_respostas()
     df_professional = open_professional()
     df_resposta.to_csv("./csv/respostas.csv")

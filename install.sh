@@ -31,7 +31,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     pyinstaller --onefile --icon=img/logo.png main.py
 
     echo "🔧 Criando atalho no Linux..."
-    DESKTOP_FILE=~/Desktop/MeuProjeto.desktop
+    DESKTOP_FILE=~/desktop/MetAMORfose.desktop
     EXEC_PATH="$(pwd)/dist/main"
 
     cat <<EOF > "$DESKTOP_FILE"

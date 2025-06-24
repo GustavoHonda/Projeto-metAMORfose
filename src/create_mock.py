@@ -24,7 +24,7 @@ columns = [
 
 prices = [30, 50, 60, 70, 80, 90, 100]
 
-def generate_mock_respostas(num_rows = 50):
+def generate_mock_respostas(num_rows = 50)->pd.DataFrame:
     # Criar mock de respostas
     data = []
     for i in range(1, num_rows + 1):
@@ -49,7 +49,7 @@ def generate_mock_respostas(num_rows = 50):
     return df_respostas
 
 
-def generate_mock_professionals(n=50, seed=42):
+def generate_mock_professionals(n=50, seed=42)-> pd.DataFrame:
     fake = Faker()
     random.seed(seed)
     Faker.seed(seed)
@@ -74,7 +74,7 @@ def generate_mock_professionals(n=50, seed=42):
 
 
 
-def main():
+def main()->None:
     df_profissionais = generate_mock_professionals(50)
     df_respostas = generate_mock_respostas(50)
     

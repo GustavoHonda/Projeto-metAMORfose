@@ -46,23 +46,30 @@ def exit_webpg():
     sys.exit(0)
     
     
-def open_page():
+def open_page()->web:
     enable_localhost_execution()
-    response = web.open("https://web.whatsapp.com")
+    urls = ["https://web.whatsapp.com"]
+
+    browsers = [web, "/usr/bin/google-chrome", r"C:\Program Files (x86)\Mozilla Firefox\firefox"]
+    response = None
+
+    for browser in browsers:
+        if browser == web:
+            response = web.open(urls[0]) 
+        else:
+            response = web.get(browser).open(urls[0])
+
+        if response:
+            print("Connection established")
+            break
+
     if not response:
-        google = "/usr/bin/google-chrome" if platform.system() == "Linux" else "C:/Program Files/Google/Chrome/Application/chrome.exe"
-        response = web.get(google).open("https://web.whatsapp.com")
-    if not response:
-        response = web.get(firefox).open("https://web.whatsapp.com")
-        firefox = r"C:\Program Files (x86)\Mozilla Firefox\firefox"
-    if not response:
-        raise ConnectionError
-    else:
-        print("Connection established")    
+        raise ConnectionError("Não consegui acessar a página.")    
+
     return response
 
 
-def locate_img(path):
+def locate_img(path)-> tuple:
     try:
         screenshot = pg.screenshot()
         screenshot.save("print_debug.png")

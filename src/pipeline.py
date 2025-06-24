@@ -3,10 +3,10 @@ from src.get_data import open_mock_professional, open_mock_respostas, data_info
 from src.send_msg import send_batch 
 from src.matching import match
 
-SAFE_TO_EXEC=True
-EXECUTION_MODE="production"
+SAFE_TO_EXEC=False
+EXECUTION_MODE="mock"
 
-def main():
+def main()-> int:
     if EXECUTION_MODE == "production":
         print("Running in production mode...")
         df_professional = open_professional()
