@@ -15,7 +15,7 @@ base_path = get_project_root()
 # 4. Trocar id das URL dos google sheets para os de produção.
 # 5. Testar sem envio de mensagens pressionando enter.
 
-def data_info(df, column):
+def data_info(df, column)-> None:
     """
     Função auxiliar que mostra os valores únicos, tipo e frequência de uma coluna do DataFrame.
 
@@ -29,7 +29,7 @@ def data_info(df, column):
     print(df[column].value_counts())  # inclui NaNs se houver
 
 
-def extrair_precos(texto):
+def extrair_precos(texto)-> list:
     # Remove separador de milhar
     texto = re.sub(r'\.(?=\d{3}(?:,|$))', '', str(texto))
     # Troca vírgula decimal por ponto
@@ -43,7 +43,6 @@ def extrair_precos(texto):
     # Converte os valores válidos para float
     return [float(p) for p in precos if p.replace('.', '', 1).isdigit()]
 
-    
 
 def preprocess_respostas(df)->pd.DataFrame:
     
@@ -70,9 +69,6 @@ def preprocess_respostas(df)->pd.DataFrame:
     df.loc[:,'datetime'] = pd.to_datetime(df['time'], dayfirst=True)
     df[['date','time']] = df['time'].str.split(" ", expand= True )
     
-    # df["datetime"] = df["datetime"].dt.strftime(f'%Y-%m-%d %H:%M:%S')
-    
-    
     # Price Column
     df['price'] = df['price'].apply(extrair_precos)
     df["price_max"] = df["price"].apply(lambda x: x[0] if isinstance(x, list) and len(x) > 0 else 300)
@@ -95,7 +91,7 @@ def preprocess_professional(df) -> pd.DataFrame:
     # Remove linhas que tem valor da coluna 'active' como zero
     df = df[df['active'] != 0] 
     
-    #area column
+    # Area column
     df.loc[:,"area"] = df["area"].str.split(",")
     df = df.explode('area')
     df.loc[:,'area'] = df['area'].str.replace(":","", regex=True)
@@ -105,18 +101,11 @@ def preprocess_professional(df) -> pd.DataFrame:
     df = df.dropna(axis=1,how='all')
     df = df.dropna(axis=0,subset=['name_professional', 'area', 'phone_professional'])
     df.loc[:,'phone_professional'] = df['phone_professional'].apply(lambda x: x.replace("wa.me/","") if type(x) == str else x)
-    # df.loc[:,'price'] = df['price'].apply(lambda x: x.replace("+","") if type(x) == str else x )
-    
-    # Setting correct types
-    # type_columns = [int,str,str,str,int,int,object,str,int]
-    # for i,coluna in enumerate(df.columns):
-    #     df.loc[:,coluna] = df[coluna].astype(str).astype(type_columns[i])
+
     return df
 
 
 def open_respostas()-> pd.DataFrame:
-    # sheets_respostas = data['url_respostas']
-    # df = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{sheets_respostas}/export?format=csv")
     client = set_credentials()
     df = get_data(sheets_name="Respostas-2025",page="Respostas", client=client)
     df = preprocess_respostas(df)
@@ -124,8 +113,6 @@ def open_respostas()-> pd.DataFrame:
 
 
 def open_professional()-> pd.DataFrame:
-    # sheets_professional = data['url_profissionais']
-    # df = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{sheets_professional}/export?format=csv")
     client = set_credentials()
     df = get_data(sheets_name="Profissionais",page="Página1", client=client)
     df = preprocess_professional(df)
@@ -221,9 +208,6 @@ def main()-> None:
     df_resposta.to_csv("./csv/respostas.csv")
     df_professional.to_csv("./csv/professional.csv")
     data_info(df_resposta, "price")
-    # print(df_professional)
-    # send_data(sheets_name="db-metAMORfose",df=df_resposta,page="Respostas")
-    # send_data(sheets_name="db-metAMORfose",df=df_professional,page="Profissionais")
 
 
 if __name__ == "__main__":

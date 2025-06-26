@@ -9,6 +9,7 @@ import platform
 from src.utils.path import get_project_root
 import sys
 import pyperclip
+from abc import ABC, abstractmethod
 
 
 base_path = get_project_root()

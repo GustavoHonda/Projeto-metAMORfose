@@ -11,7 +11,7 @@ from src.get_data import data_info, open_matches, save_matches, open_professiona
 # 5. Atualizar testes
 # 6. (ANALIZAR) viabilidade de adicionar matching de profissionais e pacientes 
 
-def all_match(df_professional, df_resposta,df_matchings):
+def all_match(df_professional, df_resposta,df_matchings)-> pd.DataFrame:
     query = """
     SELECT 
         paci.name_paciente,
@@ -29,11 +29,6 @@ def all_match(df_professional, df_resposta,df_matchings):
     JOIN df_resposta paci
         ON paci.area = prof.area
     """
-    # LEFT JOIN df_matchings prev
-    #     ON paci.phone_paciente = prev.phone_paciente
-    #     AND prof.phone_professional = prev.phone_professional
-    # WHERE prev.phone_paciente IS NULL
-    # AND prev.phone_professional IS NULL
     
     all_matches = sqldf(query, locals())
     return all_matches
@@ -91,11 +86,10 @@ def select_match(df_matchings,df_all_matches)-> pd.DataFrame:
         profissionais_usados.add(professional)
         paciente_counts[paciente] += 1
 
-    # Resultado como DataFrame
     result_df = pd.DataFrame(matchings_final, columns=df_all_matches.columns)
     return result_df
 
-def add_missing_matches(df_professional, df_selected_matches, df_all_matches):
+def add_missing_matches(df_professional, df_selected_matches, df_all_matches)-> pd.DataFrame:
     # Calcula os telefones dos profissionais que não foram selecionados
     prof_phones = set(df_professional['phone_professional'])
     selected_phones = set(df_selected_matches['phone_professional'])
@@ -128,7 +122,7 @@ def add_missing_matches(df_professional, df_selected_matches, df_all_matches):
     return df_selected_matches
 
 
-def match(df_professional, df_resposta, df_matchings):
+def match(df_professional, df_resposta, df_matchings)-> pd.DataFrame:
     df_all_matches = all_match(df_professional, df_resposta,df_matchings)
     df_selected_matches = select_match(df_matchings,df_all_matches)
     df_selected_matches = add_missing_matches(df_professional, df_selected_matches, df_all_matches)
@@ -137,7 +131,7 @@ def match(df_professional, df_resposta, df_matchings):
     return df_selected_matches
 
 
-def main():
+def main()-> None:
     df_professional = open_professional()
     df_resposta = open_respostas()
     df_matchings = open_matches()
@@ -145,7 +139,7 @@ def main():
     resultado = match(df_professional,df_resposta,df_matchings)
 
 
-def mock():
+def mock()-> None:
     df_professional = open_mock_professional()
     df_paciente = open_mock_respostas()
     df_matches = open_matches()

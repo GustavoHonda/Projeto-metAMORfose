@@ -1,5 +1,11 @@
 # Projeto-metAMORfose
 
+### Sobre a organização dos diretórios
+Os 3 direstórios principais são get_data, matching e send_msg.
+
+Respectivamente, enviam e recebem dados do google sheets; fazem o pareamento entre profissionais e pacientes; fazem o envio das mensagens via whatsapp.
+
+
 ### Para criar o ambiente de desenvolvimento
 ```bash
 cd /caminho/para/Projeto-metAMORfose/
@@ -9,7 +15,7 @@ pip install -r requirements.txt
 cp -r ~/Downloads/key/ /caminho/para/Projeto-metAMORfose/
 ```
 
-### Execução dos módulos
+### Execução dos módulos individualmente 
 ```bash
 cd /caminho/para/Projeto-metAMORfose/
 pytho -m src.qualer_um_dos_modulos_dentro_de_src
@@ -21,7 +27,7 @@ cd /caminho/para/Projeto-metAMORfose/
 pytest ./test
 ```
 
-### Criação de um executável e atalho na área de trabalho
+### Criação de um executável
 ```bash
 # Para Windows:
 install.bat
