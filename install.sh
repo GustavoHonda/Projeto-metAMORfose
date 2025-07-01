@@ -28,7 +28,9 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     fi
     source venv/bin/activate
 
-    pyinstaller --onefile --icon=img/logo.png main.py
+    pyinstaller --onefile --name=production --icon=img/logo.png main.py
+    # pyinstaller --onefile --name=mock --icon=img/logo.png mock.py
+    # pyinstaller --onefile --name=manual --icon=img/logo.png manual.py
 
     echo "✅ Instalação concluída! Atalho criado na área de trabalho."
     echo "Qualquer dúvida entrar em contato com gustavo.honda10@gmail.com"

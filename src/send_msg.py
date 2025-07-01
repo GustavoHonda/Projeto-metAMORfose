@@ -154,7 +154,39 @@ class Pyautogui_sender(SendMsg):
         except Exception as e:
             print(f"❌ Unexpected error in locate_new_chat(): {e}")
             return -1
+    
 
+    def locate_chat_bar(553183336965self) -> tuple | int:
+        """
+        Percorre as imagens da pasta 'img/chat_bar' e localiza a primeira encontrada na tela.
+        """
+        try:
+            # Salva um screenshot geral para debug
+            debug_img_path = Path(base_path) / "img" / "screenshot_debug_chat_bar.png"
+            screenshot = pg.screenshot()
+            screenshot.save(debug_img_path)
+
+            path_img_dir = Path(base_path) / "img" / "chat_bar"
+            new_chat = None
+
+            for path in path_img_dir.iterdir():
+                if path.is_file():
+                    new_chat = self.locate_img(str(path))
+                    if new_chat is not None:
+                        break
+
+            if new_chat is None:
+                print("❌ Error: new chat not found on screen.")
+                self.exit_webpg()
+                return -1
+
+            x, y = pg.center(new_chat)
+            print(f"✅ New chat found at: ({x}, {y})")
+            return x, y
+
+        except Exception as e:
+            print(f"❌ Unexpected error in locate_new_chat(): {e}")
+            return -1
         
     
     def human_write(self, texto)-> None:
@@ -172,21 +204,28 @@ class Pyautogui_sender(SendMsg):
             else:
                 pg.write(char)
             time.sleep(random.uniform(0.035, 0.009))  
+            5511956191855
+
             
         
     def send_msg(self,phone, message,new_chat_pos)-> None:
-        time.sleep(5) 
+        time.sleep(3) 
         pg.click(new_chat_pos[0], new_chat_pos[1])
+        pg.click(new_chat_pos[0], new_chat_pos[1])
+        time.sleep(3)
         pg.write(str(phone))
-        time.sleep(5)
+        time.sleep(3)
         pg.press('enter')
         pg.press('enter')
-        time.sleep(7)
+        time.sleep(3)
+        chat_bar_x, chat_bar_y = self.locate_chat_bar()
+        pg.click(chat_bar_x, chat_bar_y)
+        time.sleep(3)
         for line in message:
             print(line)
             self.human_write(line)
             pg.hotkey('shift', 'enter')
-        time.sleep(5)
+        time.sleep(3)
         pg.press("enter")
 
 
@@ -206,6 +245,11 @@ class Pyautogui_sender(SendMsg):
 
 
 class Selenium_sender(SendMsg):
+
+    def exit_webpg(self, driver)-> None:
+        driver.close()
+        
+
     def open_page(self)-> webdriver:
         try: 
             # (Opcional) executa em modo "headless":
@@ -263,6 +307,7 @@ class Selenium_sender(SendMsg):
 def write_message(df)-> None:
     print("Printing messages to file...")
     with open("messages.txt", "w") as f:
+        print(df)
         for index, row in df.iterrows():
             text = text_message(row)
             f.write(f"Mensagem {index + 1}:\n")
@@ -274,7 +319,7 @@ def write_message(df)-> None:
 def text_message(row)-> tuple:
     name_paciente, name_professional, area,phone,description,price_min,price_max = row["name_paciente"], row["name_professional"],row["area"], row["phone_paciente"], row["description"], row["price_min"],row["price_max"]
     text = (
-            f"Olá {name_professional}, tudo bem? Sou a MetAMORfose!",
+            f"Olá {name_professional}, tudo bem? Sou a Inteligência Artificial da MetAMORfose!",
             f"Você foi conectado com um paciente da área de {area}:",
             f"",
             f"👤Nome: {name_paciente}",
