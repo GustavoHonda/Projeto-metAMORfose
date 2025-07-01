@@ -4,8 +4,8 @@ from src.get_data import open_mock_professional, open_mock_respostas, data_info
 from src.send_msg import Pyautogui_sender, write_message
 from src.matching import match
 
-SAFE_TO_EXEC=False
-EXECUTION_MODE="manual"
+SAFE_TO_EXEC=True
+EXECUTION_MODE="mock"
 
 def main()-> int:
     if EXECUTION_MODE == "production":

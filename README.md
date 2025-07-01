@@ -42,6 +42,9 @@ install.bat
 ```bash
 sudo apt update
 sudo apt install xclip
+
+xhost +
+sudo apt install python3-tk
 ```
 
 

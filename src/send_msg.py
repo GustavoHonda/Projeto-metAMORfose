@@ -12,6 +12,8 @@ from abc import ABC, abstractmethod
 import sys
 import pyperclip
 import os
+import mss
+from PIL import Image
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -23,6 +25,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 base_path = get_project_root()
+os.environ.setdefault("DISPLAY", ":0")
+
 
 # Erros/implementações que tem pra fazer/corrigir nesse módulo:
 # 1. (FEITO) Ao buscar a imagem search_bar na tela do usuário o tamanho da imagem é levado em consideração
@@ -93,51 +97,67 @@ class Pyautogui_sender(SendMsg):
 
         return response
 
-
-    def locate_img(self,path)-> tuple:
+    def locate_img(self, path: str) -> tuple | None:
+        """
+        Localiza uma imagem na tela com confiança de 80% usando MSS.
+        """
         try:
-            screenshot = pg.screenshot()
-            screenshot.save("print_debug.png")
-            search_bar = pg.locateOnScreen(path, confidence=0.8) 
-            return search_bar
+            # Captura a tela com mss
+            with mss.mss() as sct:
+                monitor = sct.monitors[1]  # tela inteira
+                sct_img = sct.grab(monitor)
+
+            # Converte para uma imagem PIL
+            img = Image.frombytes('RGB', sct_img.size, sct_img.rgb)
+
+            # (Opcional) salvar para debug
+            img.save("print_debug.png")
+
+            # Usa pyautogui.locate() passando a imagem manualmente
+            match = pg.locate(path, img, confidence=0.8)
+
+            return match
+
         except Exception as e:
-            print(f"Exception: in locating {path}")
+            print(f"❌ Exception while locating image '{path}': {e}")
             return None
 
 
-    def locate_search_bar(self)-> tuple:
-        path_img = Path(base_path, "img","search_bar")
-        for path in path_img.iterdir():
-            path = str(path)
-            search_bar = self.locate_img(path)
-            if search_bar is not None:
-                break
-        if search_bar is None:
-            print("Error: search_bar not found")
-            self.exit_webpg()
-            return -1
-        search_bar_x, search_bar_y = pg.center(search_bar) 
-        print(search_bar_x, search_bar_y)
-        return search_bar_x, search_bar_y
+    def locate_new_chat(self) -> tuple | int:
+        """
+        Percorre as imagens da pasta 'img/new_chat' e localiza a primeira encontrada na tela.
+        """
+        try:
+            # Salva um screenshot geral para debug
+            debug_img_path = Path(base_path) / "img" / "screenshot_debug.png"
+            screenshot = pg.screenshot()
+            screenshot.save(debug_img_path)
 
+            path_img_dir = Path(base_path) / "img" / "new_chat"
+            new_chat = None
 
-    def locate_new_chat(self)-> tuple:
-        path_img = Path(base_path, "img", "new_chat")
-        for path in path_img.iterdir():
-            path = str(path)
-            new_chat = self.locate_img(path)
-            if new_chat is not None:
-                break
-        if new_chat is None:
-            print("Error: new chat not found")
-            self.exit_webpg()
+            for path in path_img_dir.iterdir():
+                if path.is_file():
+                    new_chat = self.locate_img(str(path))
+                    if new_chat is not None:
+                        break
+
+            if new_chat is None:
+                print("❌ Error: new chat not found on screen.")
+                self.exit_webpg()
+                return -1
+
+            x, y = pg.center(new_chat)
+            print(f"✅ New chat found at: ({x}, {y})")
+            return x, y
+
+        except Exception as e:
+            print(f"❌ Unexpected error in locate_new_chat(): {e}")
             return -1
-        search_bar_x, search_bar_y = pg.center(new_chat) 
-        print(search_bar_x, search_bar_y)
-        return search_bar_x, search_bar_y
+
         
     
-    def human_write(texto)-> None:
+    def human_write(self, texto)-> None:
         def precisa_clipboard(char)-> bool:
             return char in 'áàâãäéèêëíìîïóòôõöúùûüÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜç👤📞💰📋'
         for char in texto:
@@ -154,14 +174,16 @@ class Pyautogui_sender(SendMsg):
             time.sleep(random.uniform(0.035, 0.009))  
             
         
-    def send_msg(self,phone, message, search_bar_pos,new_chat_pos)-> None:
+    def send_msg(self,phone, message,new_chat_pos)-> None:
         time.sleep(5) 
         pg.click(new_chat_pos[0], new_chat_pos[1])
         pg.write(str(phone))
         time.sleep(5)
         pg.press('enter')
+        pg.press('enter')
         time.sleep(7)
         for line in message:
+            print(line)
             self.human_write(line)
             pg.hotkey('shift', 'enter')
         time.sleep(5)
@@ -170,13 +192,13 @@ class Pyautogui_sender(SendMsg):
 
     def send_batch(self,df)-> None:
         response = self.open_page(),
-        time.sleep(60)
-        pos_search_bar = self.locate_search_bar()
+        time.sleep(10)
+        # pos_search_bar = self.locate_search_bar()
         pos_new_chat = self.locate_new_chat()
         print(df.columns)
         for index, row in df.iterrows():
             text = text_message(row)
-            self.send_msg(row["phone_professional"], text, pos_search_bar, pos_new_chat)
+            self.send_msg(row["phone_professional"], text, pos_new_chat)
             print(f"{index + 1} de {len(df)} mensagens enviadas")
         print("Sent all messages")
         self.exit_webpg()
