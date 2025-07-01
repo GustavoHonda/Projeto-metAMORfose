@@ -8,6 +8,8 @@ from selenium.webdriver.chrome.options import Options
 import os
 import time
 import requests
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 # DataFrame de pacientes (agora com 13 pacientes)
@@ -111,10 +113,8 @@ df_resultado = pd.read_excel(caminho_arquivo_excel)
 # 2. Inicializar o navegador (WhatsApp Web)
 
 usuario = 'gustavo_honda@usp.br'
-# usuario = 'nsiamfumukunzayila@yahoo.com.br'
 dir_path = os.getcwd()
 chrome_options2 = Options()
-# chrome_options2.add_argument(r"user-data-dir=" + dir_path + "/pasta/sessao")
 chrome_options2.add_argument(r"/usr/bin/")
 driver = webdriver.Chrome(options=chrome_options2)
 driver.get('https://web.whatsapp.com/')
@@ -150,18 +150,13 @@ Obrigado!
     ##############################################################
     ##############################################################
     
-
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 # Abrir conversa
 driver.get(link)
 try:
-    # Aguarda até que a caixa de texto esteja presente (espera explícita)
     caixa_texto = WebDriverWait(driver, 2500).until(
         EC.presence_of_element_located((By.XPATH, '//div[@contenteditable="true"][@data-tab="10"]'))
     )
-    time.sleep(10)  # pequena pausa antes do clique
-    # Clicar no botão de enviar (com novo seletor mais robusto)
+    time.sleep(10)
     botao_enviar = WebDriverWait(driver, 300).until(
         EC.element_to_be_clickable((By.XPATH, '//button[@aria-label="Enviar"]'))
     )
