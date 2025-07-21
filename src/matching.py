@@ -35,7 +35,9 @@ def all_match(df_professional, df_resposta,df_matchings)-> pd.DataFrame:
 
 def select_match(df_matchings,df_all_matches)-> pd.DataFrame:
     query = """
-    SELECT 
+    SELECT
+
+    
         all_matches.datetime,
         all_matches.name_paciente,
         all_matches.name_professional,

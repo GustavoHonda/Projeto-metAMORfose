@@ -156,7 +156,7 @@ class Pyautogui_sender(SendMsg):
             return -1
     
 
-    def locate_chat_bar(553183336965self) -> tuple | int:
+    def locate_chat_bar(self) -> tuple | int:
         """
         Percorre as imagens da pasta 'img/chat_bar' e localiza a primeira encontrada na tela.
         """
@@ -204,17 +204,15 @@ class Pyautogui_sender(SendMsg):
             else:
                 pg.write(char)
             time.sleep(random.uniform(0.035, 0.009))  
-            5511956191855
 
-            
-        
     def send_msg(self,phone, message,new_chat_pos)-> None:
         time.sleep(3) 
         pg.click(new_chat_pos[0], new_chat_pos[1])
         pg.click(new_chat_pos[0], new_chat_pos[1])
+        pg.click(new_chat_pos[0], new_chat_pos[1])
         time.sleep(3)
-        pg.write(str(phone))
-        time.sleep(3)
+        self.human_write(phone)
+        time.sleep(10)
         pg.press('enter')
         pg.press('enter')
         time.sleep(3)
@@ -235,7 +233,8 @@ class Pyautogui_sender(SendMsg):
         # pos_search_bar = self.locate_search_bar()
         pos_new_chat = self.locate_new_chat()
         print(df.columns)
-        for index, row in df.iterrows():
+        df = df.reset_index(drop=True)
+        for  index, row in df.iterrows():
             text = text_message(row)
             self.send_msg(row["phone_professional"], text, pos_new_chat)
             print(f"{index + 1} de {len(df)} mensagens enviadas")
@@ -333,5 +332,5 @@ def text_message(row)-> tuple:
 
 if __name__ == '__main__':
     df = open_mock()
-    sender = Selenium_sender()
+    sender = Pyautogui_sender()
     sender.send_batch(df)
