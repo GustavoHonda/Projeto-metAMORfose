@@ -67,7 +67,7 @@ class Whapi_sender(SendMsg):
         self.app = Flask(__name__)
         self.session = requests.Session()
 
-        
+
     def send_msg(self,phone, message)-> None:
         message = "\n".join(message)
         phone = str(phone).replace(" ", "").replace("", "")
