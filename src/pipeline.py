@@ -1,7 +1,7 @@
 from os import write
 from src.get_data import open_professional, open_respostas, open_mock, open_matches
 from src.get_data import open_mock_professional, open_mock_respostas, data_info
-from src.send_msg import Pyautogui_sender, write_message
+from src.send_msg import write_message, Whapi_sender
 from src.matching import match
 
 
@@ -43,7 +43,7 @@ def main(EXECUTION_MODE, SAFE_TO_EXEC)-> int:
     if SAFE_TO_EXEC:
         
         print("Safe to execute, sending batch...")
-        sender  = Pyautogui_sender()
+        sender  = Whapi_sender()
         response = sender.send_batch(matched)
     print("End of pipeline")
     return 0
