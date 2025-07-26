@@ -31,7 +31,7 @@ def generate_mock_respostas(num_rows = 50)->pd.DataFrame:
         nome = fake.name()
         email = fake.email()
         # 11976154853
-        telefone = fake.numerify(text="11950440023")
+        telefone = fake.numerify(text="5511950440023")
         area = random.choice(areas)
         problema = fake.sentence(nb_words=6)
         preco = random.choice(prices)
@@ -39,7 +39,7 @@ def generate_mock_respostas(num_rows = 50)->pd.DataFrame:
             fake.date_time_this_year().strftime(f"%d/%m/%Y %H:%M:%S"),
             nome,
             email,
-            f"55{telefone}",
+            f"{telefone}",
             area,
             problema,
             preco,
@@ -60,7 +60,7 @@ def generate_mock_professionals(n=50, seed=42)-> pd.DataFrame:
         name = fake.name()
         area = random.choice(areas)
         registration = f"REG{random.randint(10000, 99999)}"
-        phone_number = f"11950440023"
+        phone_number = f"5511950440023"
         price = random.choice(prices)
         data.append({
             "name": name,
