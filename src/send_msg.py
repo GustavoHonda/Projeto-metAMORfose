@@ -10,8 +10,10 @@ os.environ.setdefault("DISPLAY", ":0")
 
 # Whapi imports
 import requests
-from flask import Flask, request, jsonify
+from flask import Flask
 from dotenv import load_dotenv
+
+import requests
 
 
 # Erros/implementações que tem pra fazer/corrigir nesse módulo:
@@ -26,7 +28,7 @@ from dotenv import load_dotenv
 class SendMsg(ABC):
 
     @abstractmethod
-    def send_msg(self, phone, message, search_bar_pos, new_chat_pos)-> None:
+    def send_msg(self, phone, message)-> None:
         pass
 
     @abstractmethod
@@ -96,60 +98,60 @@ class Whapi_sender(SendMsg):
         print("Sent all messages")
 
 
-    # def send_whapi_request(endpoint, params=None, method='POST'):
-    #     """
-    #     Send a request to the Whapi.Cloud API.
-    #     Handles both JSON and multipart (media) requests.
-    #     """
-    #     headers = {
-    #         'Authorization': f"Bearer {os.getenv('TOKEN')}"
-    #     }
-    #     url = f"{os.getenv('API_URL')}/{endpoint}"
-    #     if params:
-    #         if 'media' in params:
-    #             # Handle file upload for media messages
-    #             details = params.pop('media').split(';')
-    #             with open(details[0], 'rb') as file:
-    #                 m = MultipartEncoder(fields={**params, 'media': (details[0], file, details[1])})
-    #                 headers['Content-Type'] = m.content_type
-    #                 response = requests.request(method, url, data=m, headers=headers)
-    #         elif method == 'GET':
-    #             response = requests.get(url, params=params, headers=headers)
-    #         else:
-    #             headers['Content-Type'] = 'application/json'
-    #             response = requests.request(method, url, json=params, headers=headers)
-    #     else:
-    #         response = requests.request(method, url, headers=headers)
-    #     print('Whapi response:', response.json())  # Debug output
-    #     return response.json()
+class Meta_sender(SendMsg):
+    def __init__(self):
+        load_dotenv()
+        self.number_id = os.getenv("META_NUMBER_ID")
+        self.url = f"https://graph.facebook.com/v20.0/{self.number_id}/messages"
+        self.token = os.getenv("META_TOKEN")
+        self.headers = {
+            "Authorization": f"Bearer {self.token}",
+            "Content-Type": "application/json"
+        }
+        
 
 
-    # def set_hook():
-    #     """
-    #     Register webhook URL with Whapi.Cloud if BOT_URL is set.
-    #     """
-    #     if os.getenv('BOT_URL'):
-    #         settings = {
-    #             'webhooks': [
-    #                 {
-    #                     'url': os.getenv('BOT_URL'),
-    #                     'events': [
-    #                         {'type': "messages", 'method': "post"}
-    #                     ],
-    #                     'mode': "method"
-    #                 }
-    #             ]
-    #         }
-    #         send_whapi_request('settings', settings, 'PATCH')
+    def send_msg(self,phone, message)-> None:
+        self.payload = {
+            "messaging_product": "whatsapp",
+            "to": message["phone_professional"],
+            "type": "template",
+            "template": {
+                "name": "conexao_profissional_paciente",
+                "language": {"code": "pt_BR"},
+                "components": [
+                    {
+                        "type": "body",
+                        "parameters": [
+                            {"type": "text", "text": message["name_professional"]},
+                            {"type": "text", "text": message["area"]},
+                            {"type": "text", "text": message["name_paciente"]},
+                            {"type": "text", "text": message["phone_paciente"]},
+                            {"type": "text", "text": message["price_min"]},
+                            {"type": "text", "text": message["price_max"]}
+                        ]
+                    }
+                ]
+            }
+        }
+        print(self.url, self.payload)
 
-    
-    # def set_hook(self):
-    #     set_hook()  # Register webhook on startup
-    #     port = os.getenv('PORT') 
-    #     app.run(port=port, debug=True)
+        response = requests.post(self.url, headers=self.headers, json=self.payload)
+        print(response.status_code)
+        print(response.json())
 
+        return response.status_code
+
+    def send_batch(self, df)-> None:
+
+        print(df.columns)
+        df = df.reset_index(drop=True)
+        for  index, row in df.iterrows():
+            self.send_msg(row["phone_professional"],row)
+            print(f"{index + 1} de {len(df)} mensagens enviadas")
+        print("Sent all messages")
 
 if __name__ == '__main__':
     df = open_mock()
-    sender = Whapi_sender()
+    sender = Meta_sender()
     sender.send_batch(df)
