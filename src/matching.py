@@ -2,6 +2,8 @@ import pandas as pd
 from pandasql import sqldf
 from collections import defaultdict
 from src.get_data import data_info, open_matches, save_matches, open_professional, open_respostas, open_mock_professional, open_mock_respostas
+from datetime import datetime
+# from src.send_msg import df
 
 # Erros/implementações que tem pra fazer/corrigir nesse módulo:
 # 1. (FEITO)matching muito simples
@@ -24,6 +26,7 @@ def all_match(df_professional, df_resposta,df_matchings)-> pd.DataFrame:
         prof.name_professional,
         prof.area AS area_professional,
         prof.phone_professional,
+        prof.email_professional,
         ROW_NUMBER() OVER (PARTITION BY paci.phone_paciente ORDER BY paci.datetime DESC) as rn_paci
     FROM df_professional prof
     JOIN df_resposta paci
@@ -33,11 +36,10 @@ def all_match(df_professional, df_resposta,df_matchings)-> pd.DataFrame:
     all_matches = sqldf(query, locals())
     return all_matches
 
-def select_match(df_matchings,df_all_matches)-> pd.DataFrame:
+
+def select_match(df_matchings, df_all_matches) -> pd.DataFrame:
     query = """
     SELECT
-
-    
         all_matches.datetime,
         all_matches.name_paciente,
         all_matches.name_professional,
@@ -46,7 +48,8 @@ def select_match(df_matchings,df_all_matches)-> pd.DataFrame:
         all_matches.description,
         all_matches.area,
         all_matches.price_max,
-        all_matches.price_min
+        all_matches.price_min,
+        all_matches.email_professional
     FROM df_all_matches all_matches
     LEFT JOIN df_matchings prev
         ON all_matches.phone_paciente = prev.phone_paciente
@@ -57,79 +60,79 @@ def select_match(df_matchings,df_all_matches)-> pd.DataFrame:
     
     df_selected_matches = sqldf(query, locals())
     
-    # Inicializar estruturas
-    paciente_counts = defaultdict(int)
-    profissionais_usados = set()
-    matchings_final = []
-
-    # Criar set de tuplas para comparação rápida dos matchings existentes
-    matchings_existentes = set()
-    if not df_matchings.empty:
-        matchings_existentes = set(
-            tuple(row) for row in df_matchings[['phone_paciente', 'phone_professional']].values
-        )
-
+    # Embaralhar para reduzir viés
     df_selected_matches = df_selected_matches.sample(frac=1, random_state=42).reset_index(drop=True)
-    # Algoritmo guloso
-    for _, row in df_selected_matches.iterrows():
-        paciente = row['phone_paciente']
-        
-        professional = row['phone_professional']
-        chave = (paciente, professional)
-        if chave in matchings_existentes:
-            continue
-        if professional in profissionais_usados:
-            continue
-        if paciente_counts[paciente] >= 2:
-            continue
 
-        # Adiciona o matching
-        matchings_final.append(row)
-        profissionais_usados.add(professional)
-        paciente_counts[paciente] += 1
+    # contadores
+    matchings_arquivados = set()
+    if not df_matchings.empty:
+        for row in df_matchings[['phone_paciente', 'phone_professional']].values:
+            matchings_arquivados.add(tuple(row))
+    matchings_existentes = defaultdict(int)
+    professional_counts = defaultdict(int)
+    matchings_final = []
+    
+    condition = 1
+    while(condition):
+        print(f"Iteração: {condition}")
+        paciente_counts = defaultdict(int)
+
+        # Loop guloso para selecionar matchings
+        for _, row in df_selected_matches.iterrows():
+            paciente = row['phone_paciente']
+            professional = row['phone_professional']
+            chave = (paciente, professional)
+
+            if chave in matchings_arquivados:
+                if condition > 2:
+                    pass
+                else:
+                    continue
+            if paciente_counts[paciente] >= 1:
+                continue
+            if professional_counts[professional] >= 4:
+                continue
+            if chave in matchings_existentes:
+                continue
+
+            # garante homogeneidade:
+            min_count = min(professional_counts.values(), default=0)
+            if professional_counts[professional] > min_count:
+                continue  # pula se esse profissional já está acima da mínima
+
+            # adiciona o matching
+            matchings_final.append(row)
+            paciente_counts[paciente] += 1
+            professional_counts[professional] += 1
+            matchings_existentes[chave] = matchings_existentes.get(chave,0) + 1  # marca como existente
+
+        # Verificar se todos os profissionais têm pelo menos 4 pacientes
+        if all(count >= 4 for count in professional_counts.values()):
+            condition = 0  # todos os profissionais têm pelo menos 4 pacientes
+        elif(condition < 3):
+            condition += 1
+        else:
+            condition = 0  # evita loop infinito, sai após 3 tentativas
+            
+            print("🔹 Pacientes Atribuidos por profissional")
+            for key in professional_counts.keys():
+                print(f"    Profissional {key}: {professional_counts[key]} pacientes")
+
+            print(" ⚠️ Limite de iterações atingido, saindo do loop. Nem todos os profissionais atingiram 4 pacientes.")
 
     result_df = pd.DataFrame(matchings_final, columns=df_all_matches.columns)
     return result_df
+       
 
-def add_missing_matches(df_professional, df_selected_matches, df_all_matches)-> pd.DataFrame:
-    # Calcula os telefones dos profissionais que não foram selecionados
-    prof_phones = set(df_professional['phone_professional'])
-    selected_phones = set(df_selected_matches['phone_professional'])
-    missing_phones = prof_phones - selected_phones
-
-    if missing_phones:
-        print(f"Warning!!! Profissionais que não foram selecionados: {len(missing_phones)}")
-    else:
-        print("Todos os profissionais foram selecionados.")
-        return df_selected_matches
-    
-    # Seleciona os matches que faltam Randomicamente de todos os matchings
-    new_matches = []
-    for phone in missing_phones:
-        possible_matches = df_all_matches[df_all_matches['phone_professional'] == phone]
-    if not possible_matches.empty:
-        random_match = possible_matches.sample(1)
-        new_matches.append(random_match)
-    else:
-        print(f"Aviso!!! nenhum match disponível para profissional {phone}.")
-
-    # Concatena os novos matches com os já selecionados
-    if new_matches:
-        df_extra_matches = pd.concat(new_matches, ignore_index=True)
-        df_selected_matches = pd.concat([df_selected_matches, df_extra_matches], ignore_index=True)
-        print(f"{len(df_extra_matches)} novos matches adicionados.")
-    else:
-        print("Nenhum novo match foi adicionado.")
-    
-    return df_selected_matches
-
-
-def match(df_professional, df_resposta, df_matchings)-> pd.DataFrame:
+def match(df_professional, df_resposta, df_matchings, save=False)-> pd.DataFrame:
     df_all_matches = all_match(df_professional, df_resposta,df_matchings)
     df_selected_matches = select_match(df_matchings,df_all_matches)
-    df_selected_matches = add_missing_matches(df_professional, df_selected_matches, df_all_matches)
+    
+
+    df_selected_matches["match_time"] = datetime.now()   
     if not df_selected_matches.empty:
-        save_matches(df_selected_matches,df_all_matches)
+        save_matches(df_selected_matches,df_all_matches,save)
+
     return df_selected_matches
 
 
@@ -138,7 +141,7 @@ def main()-> None:
     df_resposta = open_respostas()
     df_matchings = open_matches()
     
-    resultado = match(df_professional,df_resposta,df_matchings)
+    resultado = match(df_professional,df_resposta,df_matchings,False)
 
 
 def mock()-> None:
@@ -146,8 +149,12 @@ def mock()-> None:
     df_paciente = open_mock_respostas()
     df_matches = open_matches()
 
-    resultado = match(df_professional, df_paciente, df_matches)
+    print(df_professional.head())
+    print(df_paciente.head())
+    print(df_matches.head())
+    resultado = match(df_professional, df_paciente, df_matches,False)
 
+    print(resultado.head(20))
 if __name__ == "__main__":
     # main()
     mock()

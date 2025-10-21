@@ -1,32 +1,18 @@
-from typing import Any
-from src.get_data import open_mock
+from tempfile import template
+from src.get_data import open_matches, open_mock, open_professional
 from src.utils.path import get_project_root
 from abc import ABC, abstractmethod
 import os
-import time
+import boto3
+import json
+
+
 base_path = get_project_root()
 os.environ.setdefault("DISPLAY", ":0")
 
-
-# Whapi imports
-import requests
-from flask import Flask, request, jsonify
-from dotenv import load_dotenv
-
-
-# Erros/implementações que tem pra fazer/corrigir nesse módulo:
-# 1. (FEITO) Ao buscar a imagem search_bar na tela do usuário o tamanho da imagem é levado em consideração
-# 2. (ANALIZAR)check_load() acessa web.whatsapp.com e retorna apenas a tela de loading da aplicação e não sabemos se a tela carregou ou não 
-# 3. Acrescenta Selenium para fazer o envio de mensagens
-# 4. (FEITO) Tomar cuidade para a conta não ser bloqueada por utilização de chatbot (colocar timers e mimetizar o comportamento de um usuário real) 
-# 5. Melhorar a função de enviar mensagens para que ela não dependa de uma imagem
-
-
-
 class SendMsg(ABC):
-
     @abstractmethod
-    def send_msg(self, phone, message, search_bar_pos, new_chat_pos)-> None:
+    def send_msg(self, fields)-> None:
         pass
 
     @abstractmethod
@@ -34,122 +20,138 @@ class SendMsg(ABC):
         pass
 
 
-def write_message(df)-> None:
-    print("Printing messages to file...")
-    with open("messages.txt", "w") as f:
-        print(df)
-        for index, row in df.iterrows():
-            text = text_message(row)
-            f.write(f"Mensagem {index + 1}:\n")
-            f.write(f"{row["phone_professional"]}:\n")
-            f.write("\n".join(text) + "\n\n")
-        f.close()    
+class AWS_Sender(SendMsg):
+    def send_msg(self, fields)-> None:
+        client = boto3.client('sesv2', region_name='us-east-2')
 
-
-def text_message(row)-> tuple:
-    name_paciente, name_professional, area,phone,description,price_min,price_max = row["name_paciente"], row["name_professional"],row["area"], row["phone_paciente"], row["description"], row["price_min"],row["price_max"]
-    text = (
-            f"Olá {name_professional}, tudo bem? Sou a Inteligência Artificial da MetAMORfose!",
-            f"Você foi conectado com um paciente da área de {area}:",
-            f"",
-            f"👤Nome: {name_paciente}",
-            f"📞Contato: wa.me/{phone}",
-            f"📋Descrição: {description}",
-            f"💰Valor proposto pelo paciente: R${price_min} à R${price_max}",
-            f"",
-            f"Obrigada! Até a próxima!")
-    return text
-
-class Whapi_sender(SendMsg):
-    def __init__(self):
-        load_dotenv()
-        self.whapi_url = os.getenv("WHAPI_URL")
-        self.app = Flask(__name__)
-        self.session = requests.Session()
-
-
-    def send_msg(self,phone, message)-> None:
-        message = "\n".join(message)
-        phone = str(phone).replace(" ", "").replace("", "")
-        # print(phone, message)
-
-        url = "https://gate.whapi.cloud/messages/text"
-        payload = { "typing_time": 0,
-                    "to": phone,
-                    "body":  message}
-        headers = {
-            "accept": "application/json",
-            "content-type": "application/json",
-            "authorization": "Bearer zNqDoACC4QYwPCIBOjP4Bb7WwA8Jl8h8"
+        template_data = {
+            "name_professional": str(fields["name_professional"]),
+            "area": str(fields["area"]),
+            "name_paciente": str(fields["name_paciente"]),
+            "phone_paciente": str(fields["phone_paciente"]),
         }
-        response = requests.post(url, json=payload, headers=headers)
-        print(response.text)
+        template_json = json.dumps(template_data)
 
+        response = client.send_email(
+            FromEmailAddress='no-reply@orgmetamorfosepro.com.br',
+            Destination={
+                'ToAddresses': [fields["email_professional"]],
+            },
+            Content={
+                'Template': {
+                    'TemplateName': 'metamorfose_template',
+                    'TemplateData': template_json
+                }
+            }
+        )
+
+        return response
 
     def send_batch(self,df)-> None:
-        print(df.columns)
         df = df.reset_index(drop=True)
         for  index, row in df.iterrows():
-            text = text_message(row)
-            self.send_msg(row["phone_professional"], text)
+            self.send_msg(row)
             print(f"{index + 1} de {len(df)} mensagens enviadas")
         print("Sent all messages")
 
+def create_template(name):
+    client = boto3.client('sesv2')
+    response = client.create_email_template(
+        TemplateName=name,
+        TemplateContent={
+            'Subject': 'Novos Pacientes!',
+            'Text': '''Olá {{name_professional}}, tudo bem? Sou a Inteligência Artificial da Rede MetAMORfose, você assinou conosco como profissional da área de {{area}}.
+                Promovemos suas conexões com pacientes - temos Pacientes que sugerem R$150 a R$35 a consulta (para Profissionais Premium) e Pacientes de +R$300 a R$50 por consulta (para Profissionais Platinum e Superior).
+                
+                Temos um guia de como conversar com paciente em orgmetamorfose.com.br/manual-de-uso 
 
-    # def send_whapi_request(endpoint, params=None, method='POST'):
-    #     """
-    #     Send a request to the Whapi.Cloud API.
-    #     Handles both JSON and multipart (media) requests.
-    #     """
-    #     headers = {
-    #         'Authorization': f"Bearer {os.getenv('TOKEN')}"
-    #     }
-    #     url = f"{os.getenv('API_URL')}/{endpoint}"
-    #     if params:
-    #         if 'media' in params:
-    #             # Handle file upload for media messages
-    #             details = params.pop('media').split(';')
-    #             with open(details[0], 'rb') as file:
-    #                 m = MultipartEncoder(fields={**params, 'media': (details[0], file, details[1])})
-    #                 headers['Content-Type'] = m.content_type
-    #                 response = requests.request(method, url, data=m, headers=headers)
-    #         elif method == 'GET':
-    #             response = requests.get(url, params=params, headers=headers)
-    #         else:
-    #             headers['Content-Type'] = 'application/json'
-    #             response = requests.request(method, url, json=params, headers=headers)
-    #     else:
-    #         response = requests.request(method, url, headers=headers)
-    #     print('Whapi response:', response.json())  # Debug output
-    #     return response.json()
+                Entre em contato com este, que cadastrou buscar atendimento e consentiu ser conectado com você!
 
+                👤Nome: {{name_paciente}}
+                📞Contato: wa.me/{{phone_paciente}}
+                💰Vocês definem o valor. Recomendamos que o paciente pague, direto para você, antes da teleconsulta!
 
-    # def set_hook():
-    #     """
-    #     Register webhook URL with Whapi.Cloud if BOT_URL is set.
-    #     """
-    #     if os.getenv('BOT_URL'):
-    #         settings = {
-    #             'webhooks': [
-    #                 {
-    #                     'url': os.getenv('BOT_URL'),
-    #                     'events': [
-    #                         {'type': "messages", 'method': "post"}
-    #                     ],
-    #                     'mode': "method"
-    #                 }
-    #             ]
-    #         }
-    #         send_whapi_request('settings', settings, 'PATCH')
+        
+                Não responda esse email. Caso precise de suporte: orgmetamorfose.com.br/suporte
+                Obrigada por fazer parte da nossa Rede!.''',
+            'Html': '''
+                <html>
+                <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+                    <h2 style="color:#2c3e50;">Olá {{name_professional}}, tudo bem?</h2>
+                    <p style="color:#333; text-decoration:none;">
+                        Sou a <strong>Inteligência Artificial da Rede MetAMORfose</strong>.  
+                        Você se cadastrou conosco como profissional da área de <strong>{{area}}</strong>.<br>
+                        Promovemos suas conexões com pacientes - temos Pacientes que sugerem R$150 a R$35 a consulta (para Profissionais Premium) e Pacientes de +R$300 a R$50 por consulta (para Profissionais Platinum e Superior).
+                    </p>
 
-    
-    # def set_hook(self):
-    #     set_hook()  # Register webhook on startup
-    #     port = os.getenv('PORT') 
-    #     app.run(port=port, debug=True)
+                    <p style="color:#333; text-decoration:none;">
+                        📘 Consulte nosso guia de comunicação:<a href="https://orgmetamorfose.com.br/manual-de-uso" target="_blank">orgmetamorfose.com.br/manual-de-uso</a>
+                    </p>
+                    <p style="color:#333; text-decoration:none;">
+                        🛠️ Caso precise de suporte:<a href="https://orgmetamorfose.com.br/suporte" target="_blank">orgmetamorfose.com.br/suporte</a>  
+                    </p>
+                    
 
+                    <hr style="border: 1px solid #ddd; color:#333;margin 20px 0;">
+                    <h3 style="color:#333; text-decoration:none;">📩 Novo paciente interessado:</h3>
+                    <ul style="color:#333; list-style:none; padding:0; margin:0;">
+                        <li>
+                            <strong style="color:#333;">👤 Nome:</strong> {{name_paciente}}
+                        </li>
+                        <li>
+                            <strong style="color:#333;">💰 Pagamento:</strong> <span style="color:#333;"> Vocês definem o valor. Sugerimos pagamento antes da teleconsulta!</span>
+                        </li>
+                        <li>
+                            <strong style="color:#333;">📞 Contato:</strong> 
+                            <a style="color:#333 !important;" href="https://wa.me/{{phone_paciente}}" target="_blank" >
+                                wa.me/{{phone_paciente}}
+                            </a>
+                        </li>
+                    </ul>
+                    <hr style="border: 1px solid #ddd; color:#333;margin 20px 0;">
+
+                    <span style="color:#888; font-size:12px; margin-bottom:20px;"> Obrigada por fazer parte da nossa Rede!</span>
+                    <br>
+                    <span style="color:#888; font-size:12px; margin-bottom:20px;"> Equipe MetAMORfose</span>
+                    <br>
+                    <span style="color:#888; font-size:12px; margin-bottom:20px;"> Por favor, não responda esse email.</span>
+                </body>
+                </html>
+            '''
+        }
+    )
+
+    print("Template criado")
+    return response
+
+def delete_template(name):
+    client = boto3.client('sesv2')
+    response = client.delete_email_template(
+        TemplateName=name
+    )
+    print("Template deletado!")
+
+def check_templates(name):
+    client = boto3.client('sesv2')
+    response = client.list_email_templates(
+        PageSize=10,
+        NextToken=''
+    )
+    templates = [template['TemplateName'] for template in response['TemplatesMetadata']]
+    if name in templates:
+        print(f"Template {name} já existe.")
+        return True
+    else:
+        print(f"Template {name} não existe.")
+        return False
 
 if __name__ == '__main__':
+    template_name = 'metamorfose_template'
+    # check = check_templates(template_name)
+    # if check:
+    #     delete_template(template_name)
+    # create_template(template_name)
     df = open_mock()
-    sender = Whapi_sender()
-    sender.send_batch(df)
+    sender = AWS_Sender()
+    response = sender.send_batch(df)
+    print(response)

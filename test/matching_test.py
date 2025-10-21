@@ -16,7 +16,7 @@ df_matchings = pd.DataFrame([
     {"name_paciente":"Gustavo Akio Honda3","name_professional":"Gustavo Akio Honda4","phone_paciente":"11950440023","phone_professional":"11950440023","area":"psicologia","datetime":"31/08/2024 21:33:09","price_min":"35","price_max":"150"}
 ])
 
-result = match(df_professional, df_resposta, df_matchings)
+result = match(df_professional, df_resposta, df_matchings,False)
 
 
 def test_match()-> None:  

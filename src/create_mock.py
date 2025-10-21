@@ -5,11 +5,6 @@ from faker import Faker
 fake = Faker('pt_BR')
 random.seed(42)
 
-# Áreas possíveis
-areas = [
-    "Personal trainer", "Nutrição", "Psicoterapia", "Clínico geral", "Terapia", "Terapia holística"
-]
-
 # Cabeçalhos
 columns = [
     "Carimbo de data/hora",
@@ -22,52 +17,54 @@ columns = [
     "Nós temos um programa de Assistência pra Saúde Mental gratuita. Mas além dessa Assistência, temos Profissionais de saúde que podem te atender de maneira personalizada e humanizada. Você quer receber atividades terapêuticas gratuitas, além da indicação de Profissionais de Saúde?",
 ]
 
-prices = [30, 50, 60, 70, 80, 90, 100]
-
 def generate_mock_respostas(num_rows = 50)->pd.DataFrame:
     # Criar mock de respostas
+
+    areas = ["Personal trainer", "Nutrição", "Psicoterapia", "Clínico geral", "Terapia", "Terapia holística"]
+
     data = []
+    phones = ["11912345678", "11950440023", "11977777777"]
     for i in range(1, num_rows + 1):
         nome = fake.name()
         email = fake.email()
-        # 11976154853
-        telefone = fake.numerify(text="5511950440023")
         area = random.choice(areas)
         problema = fake.sentence(nb_words=6)
-        preco = random.choice(prices)
         row = [
             fake.date_time_this_year().strftime(f"%d/%m/%Y %H:%M:%S"),
             nome,
             email,
-            f"{telefone}",
+            f"55{''.join(str(random.randint(0,9)) for _ in range(8))}",
             area,
             problema,
-            preco,
+            "R$30",
             "Sim",
         ]
         data.append(row)
     df_respostas = pd.DataFrame(data, columns=columns)
     return df_respostas
 
-
 def generate_mock_professionals(n=50, seed=42)-> pd.DataFrame:
     fake = Faker()
     random.seed(seed)
     Faker.seed(seed)
 
+    users=[{"name": "Gustavo USP", "area": "Psicoterapia", "email":"gustavo.honda10@gmail.com", "phone":"11950440023"},
+             {"name": "Alaska", "area": "Psicoterapia", "email":"yalaska95@gmail.com", "phone": "11912345678"},
+             {"name": "Gustavo Pessoal", "area": "Psicoterapia", "email":"gustavo_honda@usp.br", "phone": "11977777777"},
+             {"name": "Empty email", "area": "Psicoterapia", "email":"", "phone": "119987654321"},
+             {"name": "Empty phone", "area": "Psicoterapia", "email":"gustavo.honda10@gmail.com", "phone": ""}
+             ]
+
     data = []
     for i in range(1, n + 1):
-        name = fake.name()
-        area = random.choice(areas)
-        registration = f"REG{random.randint(10000, 99999)}"
-        phone_number = f"5511950440023"
-        price = random.choice(prices)
+        user = random.choice(users)
         data.append({
-            "name": name,
-            "area": area,
-            "registration": registration,
-            "whatsapp": phone_number,
-            "price": price,
+            "name": user["name"],
+            "area": user["area"],
+            "whatsapp": user["phone"],
+            "email": user["email"],
+            "active": True,
+            "payday": "2024-12-31",
         })
 
     df = pd.DataFrame(data)

@@ -61,7 +61,7 @@ def weekday_plot(df, column= 'datetime'):
     plt.show()
     
 
-def area_plot(df, column):
+def area_plot(df, column,name):
     '''
     Plot area frequencie of given Dataframe column.
     
@@ -76,7 +76,7 @@ def area_plot(df, column):
     frequencie = df[column].value_counts()
     frequencie.sort_values(ascending=True).plot(kind='barh')
     # frequencie.plot(kind='pie',autopct='%1.1f%%')
-    plt.title('Gráfico de categorias')
+    plt.title(name)
     plt.ylabel('Categorias')
     plt.ylabel('Contagem')
     plt.show()
@@ -88,12 +88,12 @@ def main():
     df_professional = open_professional()
 
     # Print resposta charts
-    area_plot(df=df_resposta, column='area')
+    area_plot(df=df_resposta, column='area', name="Respostas per Area")
     date_plot(df=df_resposta, column='date', precision='W')
     weekday_plot(df=df_resposta, column='datetime')
 
     # Print Professional charts
-    area_plot(df=df_professional,column='area')
+    area_plot(df=df_professional[df_professional['active'].astype(bool)],column='area', name="Professional per Area")
 
 
 if __name__ == '__main__':
