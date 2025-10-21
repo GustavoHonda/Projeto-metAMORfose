@@ -48,7 +48,7 @@ def extrair_precos(texto)-> list:
 def preprocess_respostas(df)->pd.DataFrame:
     
     # Rename columns
-    name_columns= ['time','name_paciente','e-mail','phone_paciente','area','description','free_service','price']
+    name_columns= ['time','name_paciente','e-mail','phone_paciente','area','free_service','price']
     columns = list(df.columns)
     for i, col in enumerate(name_columns):
         columns[i] = col
